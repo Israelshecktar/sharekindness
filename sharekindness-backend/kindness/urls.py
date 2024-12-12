@@ -16,11 +16,15 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from kindness.views import RegisterView, LoginView
+from kindness.views import RegisterView, LoginView, DonationListCreateView, DonationDetailView, RequestListCreateView, RequestDetailView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('register/', RegisterView.as_view(), name='register'),
-    path('login/', LoginView.as_view(), name='login'),
+    path('api/register/', RegisterView.as_view(), name='register'),
+    path('api/login/', LoginView.as_view(), name='login'),
+    path('api/donations/', DonationListCreateView.as_view(), name='donation-list-create'),
+    path('api/donations/<int:pk>/', DonationDetailView.as_view(), name='donation-detail'),
+    path('api/requests/', RequestListCreateView.as_view(), name='request-list-create'),
+    path('api/requests/<int:pk>/', RequestDetailView.as_view(), name='request-detail'),
 ]
 

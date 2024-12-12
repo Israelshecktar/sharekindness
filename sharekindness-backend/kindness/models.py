@@ -1,7 +1,7 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
-# 1️⃣ Custom User model
+# 1⃣ Custom User model
 class User(AbstractUser):
     ROLE_CHOICES = [
         ('DONOR', 'Donor'),
@@ -15,7 +15,7 @@ class User(AbstractUser):
         return f"{self.username} ({self.get_role_display()})"
 
 
-# 2️⃣ Donation model
+# 2⃣ Donation model
 class Donation(models.Model):
     CATEGORY_CHOICES = [
         ('FOOD', 'Food'),
@@ -28,6 +28,7 @@ class Donation(models.Model):
     title = models.CharField(max_length=100)
     description = models.TextField()
     category = models.CharField(max_length=20, choices=CATEGORY_CHOICES, default='OTHER')
+    quantity = models.PositiveIntegerField(default=1)  # New field for quantity
     image = models.ImageField(upload_to='donation_images/', blank=True, null=True)
     status = models.CharField(max_length=20, choices=[
         ('AVAILABLE', 'Available'),
@@ -40,7 +41,7 @@ class Donation(models.Model):
         return f"{self.title} ({self.get_status_display()})"
 
 
-# 3️⃣ Request model
+# 3⃣ Request model
 class Request(models.Model):
     STATUS_CHOICES = [
         ('PENDING', 'Pending'),
