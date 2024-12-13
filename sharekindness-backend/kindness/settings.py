@@ -135,11 +135,11 @@ SIMPLE_JWT = {
 CORS_ALLOW_ALL_ORIGINS = True  # Allow all origins for development purposes
 
 # Alternatively, specify allowed origins
-# CORS_ALLOWED_ORIGINS = [
-#     "http://localhost:3000",
-#     "http://127.0.0.1:3000",
-#     "https://your-frontend-domain.com",
-# ]
+CORS_ALLOWED_ORIGINS = [
+   "http://localhost:3000",
+   "http://127.0.0.1:3000",
+   "https://your-frontend-domain.com",
+ ]
 
 CORS_ALLOW_CREDENTIALS = config.get('CORS_ALLOW_CREDENTIALS', True)
 

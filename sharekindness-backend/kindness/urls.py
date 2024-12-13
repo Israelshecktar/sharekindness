@@ -16,7 +16,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from kindness.views import RegisterView, LoginView, DonationListCreateView, DonationDetailView, RequestListCreateView, RequestDetailView
+from kindness.views import RegisterView, LoginView, DonationListCreateView, DonationDetailView, RequestListCreateView, RequestDetailView, LogView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -26,5 +26,6 @@ urlpatterns = [
     path('api/donations/<int:pk>/', DonationDetailView.as_view(), name='donation-detail'),
     path('api/requests/', RequestListCreateView.as_view(), name='request-list-create'),
     path('api/requests/<int:pk>/', RequestDetailView.as_view(), name='request-detail'),
+    path('api/log/', LogView.as_view(), name='log'),
 ]
 

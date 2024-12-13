@@ -2,160 +2,168 @@ import logging
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
-from django.contrib.auth import authenticate
-from .serializers import RegisterSerializer, UserSerializer, DonationSerializer, RequestSerializer
+from django.contrib.auth import authenticate, get_user_model
+from django.shortcuts import get_object_or_404
+from .serializers import (
+    RegisterSerializer,
+    UserSerializer,
+    DonationSerializer,
+    RequestSerializer,
+)
 from .models import Donation, Request
 
 logger = logging.getLogger(__name__)
+User = get_user_model()
+
+
+def handle_error(message, status_code):
+    """Helper for creating error responses and logging."""
+    logger.error(message)
+    return Response({"error": message}, status=status_code)
+
 
 # 1️⃣ Register View (POST /register/)
 class RegisterView(APIView):
+    permission_classes = [AllowAny]
+
     def post(self, request):
-        logger.info("Register request received with data: %s", request.data)
         serializer = RegisterSerializer(data=request.data)
         if serializer.is_valid():
             user = serializer.save()
-            user_data = UserSerializer(user).data
-            logger.info("User registered successfully: %s", user_data)
-            return Response({
-                'message': 'User registered successfully!',
-                'user': user_data
-            }, status=status.HTTP_201_CREATED)
-        logger.error("Register request failed: %s", serializer.errors)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {
+                    "message": "User registered successfully!",
+                    "user": UserSerializer(user).data,
+                },
+                status=status.HTTP_201_CREATED,
+            )
+        return handle_error("Invalid registration data.", status.HTTP_400_BAD_REQUEST)
 
 
 # 2️⃣ Login View (POST /login/)
 class LoginView(APIView):
+    permission_classes = [AllowAny]
+
     def post(self, request):
-        logger.info("Login request received with data: %s", request.data)
-        username = request.data.get('username')
-        password = request.data.get('password')
+        username = request.data.get("username")
+        password = request.data.get("password")
         user = authenticate(username=username, password=password)
-        
-        if user is not None:
-            # Generate JWT tokens (Access & Refresh)
+
+        if user:
             refresh = RefreshToken.for_user(user)
-            logger.info("Login successful for user: %s", username)
-            return Response({
-                'message': 'Login successful!',
-                'access': str(refresh.access_token),
-                'refresh': str(refresh),
-            }, status=status.HTTP_200_OK)
-        else:
-            logger.error("Login request failed: Invalid username or password")
-            return Response({
-                'error': 'Invalid username or password'
-            }, status=status.HTTP_401_UNAUTHORIZED)
+            return Response(
+                {
+                    "message": "Login successful!",
+                    "access": str(refresh.access_token),
+                    "refresh": str(refresh),
+                },
+                status=status.HTTP_200_OK,
+            )
+        return handle_error("Invalid username or password.", status.HTTP_401_UNAUTHORIZED)
 
 
-# 3️⃣ Donation List/Create View (GET, POST /donations/)
-class DonationListCreateView(APIView):
-    permission_classes = [IsAuthenticated]
+# Base Class for List/Create Views
+class BaseListCreateView(APIView):
+    model = None
+    serializer_class = None
 
     def get(self, request):
-        donations = Donation.objects.all()
-        serializer = DonationSerializer(donations, many=True)
+        objects = self.model.objects.all()
+        serializer = self.serializer_class(objects, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def post(self, request):
-        serializer = DonationSerializer(data=request.data)
+        serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():
-            serializer.save(donor=request.user)
+            serializer.save(**self.get_additional_data(request))
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return handle_error("Invalid data.", status.HTTP_400_BAD_REQUEST)
+
+    def get_additional_data(self, request):
+        """Override this method to pass additional data on POST."""
+        return {}
 
 
-# 4️⃣ Donation Detail View (GET, PUT, DELETE /donations/<id>/)
-class DonationDetailView(APIView):
-    permission_classes = [IsAuthenticated]
-
-    def get_object(self, pk):
-        try:
-            return Donation.objects.get(pk=pk)
-        except Donation.DoesNotExist:
-            return None
+# Base Class for Detail Views
+class BaseDetailView(APIView):
+    model = None
+    serializer_class = None
 
     def get(self, request, pk):
-        donation = self.get_object(pk)
-        if donation:
-            serializer = DonationSerializer(donation)
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        return Response({'error': 'Donation not found'}, status=status.HTTP_404_NOT_FOUND)
-
-    def put(self, request, pk):
-        donation = self.get_object(pk)
-        if donation:
-            serializer = DonationSerializer(donation, data=request.data, partial=True)
-            if serializer.is_valid():
-                serializer.save()
-                return Response(serializer.data, status=status.HTTP_200_OK)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        return Response({'error': 'Donation not found'}, status=status.HTTP_404_NOT_FOUND)
-
-    def delete(self, request, pk):
-        donation = self.get_object(pk)
-        if donation:
-            donation.delete()
-            return Response({'message': 'Donation deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
-        return Response({'error': 'Donation not found'}, status=status.HTTP_404_NOT_FOUND)
-
-
-# 5️⃣ Request List/Create View (GET, POST /requests/)
-class RequestListCreateView(APIView):
-    permission_classes = [IsAuthenticated]
-
-    def get(self, request):
-        requests = Request.objects.all()
-        serializer = RequestSerializer(requests, many=True)
+        obj = get_object_or_404(self.model, pk=pk)
+        serializer = self.serializer_class(obj)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    def post(self, request):
-        donation_id = request.data.get('donation')
-        try:
-            donation = Donation.objects.get(pk=donation_id)
-        except Donation.DoesNotExist:
-            return Response({'error': 'Donation not found'}, status=status.HTTP_404_NOT_FOUND)
+    def put(self, request, pk):
+        obj = get_object_or_404(self.model, pk=pk)
+        serializer = self.serializer_class(obj, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return handle_error("Invalid data.", status.HTTP_400_BAD_REQUEST)
 
-        serializer = RequestSerializer(data=request.data)
+    def delete(self, request, pk):
+        obj = get_object_or_404(self.model, pk=pk)
+        obj.delete()
+        return Response(
+            {"message": f"{self.model.__name__} deleted successfully."},
+            status=status.HTTP_204_NO_CONTENT,
+        )
+
+
+# 3️⃣ Donation Views
+class DonationListCreateView(BaseListCreateView):
+    permission_classes = [IsAuthenticated]
+    model = Donation
+    serializer_class = DonationSerializer
+
+    def get_additional_data(self, request):
+        return {"donor": request.user}
+
+
+class DonationDetailView(BaseDetailView):
+    permission_classes = [IsAuthenticated]
+    model = Donation
+    serializer_class = DonationSerializer
+
+
+# 4️⃣ Request Views
+class RequestListCreateView(BaseListCreateView):
+    permission_classes = [IsAuthenticated]
+    model = Request
+    serializer_class = RequestSerializer
+
+    def post(self, request):
+        donation_id = request.data.get("donation")
+        donation = get_object_or_404(Donation, pk=donation_id)
+        serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():
             serializer.save(user=request.user, donation=donation)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return handle_error("Invalid data.", status.HTTP_400_BAD_REQUEST)
 
 
-# 6️⃣ Request Detail View (GET, PUT, DELETE /requests/<id>/)
-class RequestDetailView(APIView):
+class RequestDetailView(BaseDetailView):
     permission_classes = [IsAuthenticated]
+    model = Request
+    serializer_class = RequestSerializer
 
-    def get_object(self, pk):
-        try:
-            return Request.objects.get(pk=pk)
-        except Request.DoesNotExist:
-            return None
 
-    def get(self, request, pk):
-        request_obj = self.get_object(pk)
-        if request_obj:
-            serializer = RequestSerializer(request_obj)
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        return Response({'error': 'Request not found'}, status=status.HTTP_404_NOT_FOUND)
+# 7️⃣ Log View (POST /log/)
+class LogView(APIView):
+    permission_classes = [AllowAny]
 
-    def put(self, request, pk):
-        request_obj = self.get_object(pk)
-        if request_obj:
-            serializer = RequestSerializer(request_obj, data=request.data, partial=True)
-            if serializer.is_valid():
-                serializer.save()
-                return Response(serializer.data, status=status.HTTP_200_OK)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        return Response({'error': 'Request not found'}, status=status.HTTP_404_NOT_FOUND)
+    def post(self, request):
+        message = request.data.get("message")
+        level = request.data.get("level", "info").lower()
 
-    def delete(self, request, pk):
-        request_obj = self.get_object(pk)
-        if request_obj:
-            request_obj.delete()
-            return Response({'message': 'Request deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
-        return Response({'error': 'Request not found'}, status=status.HTTP_404_NOT_FOUND)
+        log_function = {
+            "info": logger.info,
+            "error": logger.error,
+            "debug": logger.debug,
+        }.get(level, logger.info)
+
+        log_function(message)
+        return Response({"status": "logged"}, status=status.HTTP_200_OK)
