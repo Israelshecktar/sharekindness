@@ -27,8 +27,8 @@ const AuthPage = () => {
     e.preventDefault();
 
     const endpoint = isRegister
-      ? `${process.env.NEXT_PUBLIC_API_URL}register`
-      : `${process.env.NEXT_PUBLIC_API_URL}login`;
+      ? `${process.env.NEXT_PUBLIC_API_URL}register/`
+      : `${process.env.NEXT_PUBLIC_API_URL}login/`;
 
     const body = new FormData();
     Object.keys(formData).forEach((key) => {
