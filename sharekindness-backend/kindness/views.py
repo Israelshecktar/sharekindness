@@ -24,7 +24,7 @@ def handle_error(message, status_code):
     return Response({"error": message}, status=status_code)
 
 
-# 1️⃣ Register View (POST /register/)
+# 1⃣ Register View (POST /register/)
 class RegisterView(APIView):
     permission_classes = [AllowAny]
 
@@ -42,14 +42,14 @@ class RegisterView(APIView):
         return handle_error("Invalid registration data.", status.HTTP_400_BAD_REQUEST)
 
 
-# 2️⃣ Login View (POST /login/)
+# 2⃣ Login View (POST /login/)
 class LoginView(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request):
-        username = request.data.get("username")
+        email = request.data.get("email")
         password = request.data.get("password")
-        user = authenticate(username=username, password=password)
+        user = authenticate(request, email=email, password=password)
 
         if user:
             refresh = RefreshToken.for_user(user)
@@ -61,7 +61,7 @@ class LoginView(APIView):
                 },
                 status=status.HTTP_200_OK,
             )
-        return handle_error("Invalid username or password.", status.HTTP_401_UNAUTHORIZED)
+        return handle_error("Invalid email or password.", status.HTTP_401_UNAUTHORIZED)
 
 
 # Base Class for List/Create Views
@@ -113,7 +113,7 @@ class BaseDetailView(APIView):
         )
 
 
-# 3️⃣ Donation Views
+# 3⃣ Donation Views
 class DonationListCreateView(BaseListCreateView):
     permission_classes = [IsAuthenticated]
     model = Donation
@@ -129,7 +129,7 @@ class DonationDetailView(BaseDetailView):
     serializer_class = DonationSerializer
 
 
-# 4️⃣ Request Views
+# 4⃣ Request Views
 class RequestListCreateView(BaseListCreateView):
     permission_classes = [IsAuthenticated]
     model = Request
@@ -151,7 +151,7 @@ class RequestDetailView(BaseDetailView):
     serializer_class = RequestSerializer
 
 
-# 7️⃣ Log View (POST /log/)
+# 7⃣ Log View (POST /log/)
 class LogView(APIView):
     permission_classes = [AllowAny]
 

@@ -3,13 +3,14 @@
 import { useState } from "react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import BackgroundWrapper from "../components/BackgroundWrapper";
 
 const AuthPage = () => {
   const [isRegister, setIsRegister] = useState(false);
   const [formData, setFormData] = useState({
-    username: "",
     email: "",
     password: "",
+    username: "",
     role: "RECIPIENT",
     profile_picture: null,
     contact_info: "",
@@ -32,15 +33,11 @@ const AuthPage = () => {
 
     const body = new FormData();
     Object.keys(formData).forEach((key) => {
-      body.append(key, formData[key]);
+      if (formData[key]) body.append(key, formData[key]);
     });
 
     try {
-      const response = await fetch(endpoint, {
-        method: "POST",
-        body,
-      });
-
+      const response = await fetch(endpoint, { method: "POST", body });
       const data = await response.json();
 
       if (response.ok) {
@@ -50,32 +47,22 @@ const AuthPage = () => {
         toast.error(data.error || "Something went wrong!");
       }
     } catch (error) {
-      console.error("Error:", error);
       toast.error("An error occurred. Please try again.");
     }
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-900 text-white md:flex-row">
-      <ToastContainer />
-
-      {/* Left Section: Vector Image */}
-      <div className="w-full p-6 text-center md:w-1/2">
-        <img
-          src="/vector.jpeg"
-          alt="Kindness Illustration"
-          className="w-3/4 mx-auto rounded-lg md:w-full"
-        />
-      </div>
-
-      {/* Right Section: Auth Form */}
-      <div className="w-full max-w-md p-6 text-center md:w-1/2">
+    <BackgroundWrapper>
+      <div className="w-full max-w-md px-6 py-8 text-center">
+        <ToastContainer />
         <h1 className="mb-4 text-3xl font-extrabold text-pink-500">SHAREKINDNESS</h1>
-        <p className="mb-8 text-lg italic text-gray-300">
+        <p className="mb-6 text-lg italic text-gray-300">
           “Small acts of kindness create big ripples of change.”
         </p>
 
-        <h2 className="mb-4 text-3xl font-bold">{isRegister ? "Create an Account" : "Sign In"}</h2>
+        <h2 className="mb-4 text-3xl font-bold text-white">
+          {isRegister ? "Create an Account" : "Sign In"}
+        </h2>
         <p className="mb-6 text-gray-400">
           {isRegister ? "Already have an account? " : "New user? "}
           <button
@@ -93,7 +80,7 @@ const AuthPage = () => {
               name="username"
               placeholder="Username"
               required
-              className="w-full px-4 py-2 bg-white text-gray-900 rounded-full focus:ring-2 focus:ring-pink-500"
+              className="w-full px-4 py-2 text-gray-900 bg-white rounded-full focus:ring-2 focus:ring-pink-500"
               onChange={handleChange}
             />
           )}
@@ -103,7 +90,16 @@ const AuthPage = () => {
             name="email"
             placeholder="Email Address"
             required
-            className="w-full px-4 py-2 bg-white text-gray-900 rounded-full focus:ring-2 focus:ring-pink-500"
+            className="w-full px-4 py-2 text-gray-900 bg-white rounded-full focus:ring-2 focus:ring-pink-500"
+            onChange={handleChange}
+          />
+
+          <input
+            type="password"
+            name="password"
+            placeholder="Password"
+            required
+            className="w-full px-4 py-2 text-gray-900 bg-white rounded-full focus:ring-2 focus:ring-pink-500"
             onChange={handleChange}
           />
 
@@ -112,7 +108,7 @@ const AuthPage = () => {
               <select
                 name="role"
                 required
-                className="w-full px-4 py-2 bg-white text-gray-900 rounded-full focus:ring-2 focus:ring-pink-500"
+                className="w-full px-4 py-2 text-gray-900 bg-white rounded-full focus:ring-2 focus:ring-pink-500"
                 onChange={handleChange}
               >
                 <option value="DONOR">Donor</option>
@@ -122,7 +118,7 @@ const AuthPage = () => {
               <input
                 type="file"
                 name="profile_picture"
-                className="w-full px-4 py-2 bg-white text-gray-900 rounded-full focus:ring-2 focus:ring-pink-500"
+                className="w-full px-4 py-2 text-gray-900 bg-white rounded-full focus:ring-2 focus:ring-pink-500"
                 onChange={handleChange}
               />
 
@@ -130,20 +126,11 @@ const AuthPage = () => {
                 name="contact_info"
                 placeholder="Contact Info"
                 rows="3"
-                className="w-full px-4 py-2 bg-white text-gray-900 rounded-lg focus:ring-2 focus:ring-pink-500"
+                className="w-full px-4 py-2 text-gray-900 bg-white rounded-lg focus:ring-2 focus:ring-pink-500"
                 onChange={handleChange}
               ></textarea>
             </>
           )}
-
-          <input
-            type="password"
-            name="password"
-            placeholder="Password"
-            required
-            className="w-full px-4 py-2 bg-white text-gray-900 rounded-full focus:ring-2 focus:ring-pink-500"
-            onChange={handleChange}
-          />
 
           <button
             type="submit"
@@ -155,11 +142,12 @@ const AuthPage = () => {
 
         {!isRegister && (
           <p className="mt-4 text-gray-400">
-            Forgot Password? <button className="text-pink-500 hover:underline">Click here</button>
+            Forgot Password?{" "}
+            <button className="text-pink-500 hover:underline">Click here</button>
           </p>
         )}
       </div>
-    </div>
+    </BackgroundWrapper>
   );
 };
 
