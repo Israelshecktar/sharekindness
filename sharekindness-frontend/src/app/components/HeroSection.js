@@ -1,7 +1,7 @@
 const HeroSection = () => {
   return (
     <section 
-      className="relative h-[85vh] flex items-center justify-center bg-cover bg-center overflow-hidden"
+      className="relative z-0 h-[85vh] flex items-center justify-center bg-cover bg-center overflow-hidden"
       style={{ 
         backgroundImage: "url('/hero-background.jpeg')", 
         backgroundSize: 'contain'
