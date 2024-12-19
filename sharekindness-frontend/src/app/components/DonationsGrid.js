@@ -20,8 +20,31 @@ const DonationsGrid = ({ donations }) => {
   });
 
   return (
-    <section className="p-4 bg-gray-50 min-h-screen">
-      <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
+    <section className="p-4 bg-blue-100 min-h-screen">
+      
+      {/* Category Filter (Horizontal Scroll for Mobile) */}
+      <div className="block sm:hidden mb-4">
+        <div className="flex overflow-x-scroll scrollbar-hide space-x-4 p-2">
+          {categories.map((category) => (
+            <button
+              key={category}
+              onClick={() => setSelectedCategory(category)}
+              className={`flex-shrink-0 px-4 py-2 text-sm font-semibold rounded-full 
+                ${
+                  selectedCategory === category 
+                    ? "bg-pink-600 text-white" 
+                    : "bg-blue-200 text-blue-800 hover:bg-blue-300"
+                } 
+                transition-colors`}
+            >
+              {category}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Filter & Search (For Larger Screens) */}
+      <div className="hidden sm:flex flex-row justify-between items-center mb-6 gap-4">
         <CategoryFilter
           categories={categories}
           selectedCategory={selectedCategory}
@@ -30,7 +53,7 @@ const DonationsGrid = ({ donations }) => {
         <SearchBar onSearch={setSearchQuery} />
       </div>
 
-      {/* Grid */}
+      {/* Donations Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
         {filteredDonations.length > 0 ? (
           filteredDonations.map((donation) => (
