@@ -1,4 +1,9 @@
+import { useState } from 'react';
+import DonationModal from './DonationModal';
+
 const HeroSection = () => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
   return (
     <section 
       className="relative z-0 h-[85vh] flex items-center justify-center bg-cover bg-center overflow-hidden"
@@ -29,7 +34,10 @@ const HeroSection = () => {
           </p>
           
           <div className="flex flex-col sm:flex-row mt-8 justify-start gap-4">
-            <button className="px-8 py-4 bg-gradient-to-r from-pink-500 to-yellow-500 text-white font-semibold rounded-full hover:scale-105 transition-all shadow-lg">
+            <button 
+              onClick={() => setIsModalOpen(true)} 
+              className="px-8 py-4 bg-gradient-to-r from-pink-500 to-yellow-500 text-white font-semibold rounded-full hover:scale-105 transition-all shadow-lg"
+            >
               Make a Donation
             </button>
             <button className="px-8 py-4 bg-gradient-to-r from-blue-500 to-green-500 text-white font-semibold rounded-full hover:scale-105 transition-all shadow-lg">
@@ -38,6 +46,8 @@ const HeroSection = () => {
           </div>
         </div>
       </div>
+
+      {isModalOpen && <DonationModal onClose={() => setIsModalOpen(false)} />}
     </section>
   );
 };

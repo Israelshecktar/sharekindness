@@ -18,7 +18,7 @@ const DonationCard = ({ title, category, quantity, image, status }) => {
 
       {/* Action Button */}
       <button 
-        className="mt-3 w-full bg-pink-500 text-white py-2 rounded-md hover:bg-pink-600 transition-all"
+        className="mt-3 w-full bg-pink-500 py-2 rounded-md hover:bg-pink-600 transition-all"
       >
         Request
       </button>

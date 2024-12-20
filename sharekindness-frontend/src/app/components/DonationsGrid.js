@@ -44,7 +44,7 @@ const DonationsGrid = ({ donations }) => {
       </div>
 
       {/* Filter & Search (For Larger Screens) */}
-      <div className="hidden sm:flex flex-row justify-between items-center mb-6 gap-4">
+      <div className="hidden sm:flex flex-row text-black justify-between items-center mb-6 gap-4">
         <CategoryFilter
           categories={categories}
           selectedCategory={selectedCategory}
