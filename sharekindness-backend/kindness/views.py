@@ -49,7 +49,12 @@ class LoginView(APIView):
     def post(self, request):
         email = request.data.get("email")
         password = request.data.get("password")
-        user = authenticate(request, email=email, password=password)
+
+        if not email or not password:
+            return handle_error("Email and password are required.", status.HTTP_400_BAD_REQUEST)
+
+        # Use `username=email` to pass email to the authentication backend
+        user = authenticate(request, username=email, password=password)
 
         if user:
             refresh = RefreshToken.for_user(user)
@@ -62,6 +67,7 @@ class LoginView(APIView):
                 status=status.HTTP_200_OK,
             )
         return handle_error("Invalid email or password.", status.HTTP_401_UNAUTHORIZED)
+
 
 
 # Base Class for List/Create Views

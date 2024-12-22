@@ -1,11 +1,13 @@
-"use client";
+"use client"; // Ensure this is present at the top
 
 import { useState } from "react";
+import { useRouter } from "next/navigation"; // Use next/navigation for app directory
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import BackgroundWrapper from "../components/BackgroundWrapper";
 
 const AuthPage = () => {
+  const router = useRouter(); // Initialize router
   const [isRegister, setIsRegister] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
@@ -28,8 +30,8 @@ const AuthPage = () => {
     e.preventDefault();
 
     const endpoint = isRegister
-      ? `${process.env.NEXT_PUBLIC_API_URL}register/`
-      : `${process.env.NEXT_PUBLIC_API_URL}login/`;
+      ? `${process.env.NEXT_PUBLIC_API_URL}api/register/`
+      : `${process.env.NEXT_PUBLIC_API_URL}api/login/`;
 
     const body = new FormData();
     Object.keys(formData).forEach((key) => {
@@ -41,8 +43,17 @@ const AuthPage = () => {
       const data = await response.json();
 
       if (response.ok) {
-        toast.success(isRegister ? "Registration successful!" : "Login successful!");
-        if (isRegister) setIsRegister(false);
+        toast.success(isRegister ? data.message : "Login successful!");
+
+        if (isRegister) {
+          setIsRegister(false); // Reset to login after successful registration
+        } else {
+          // Store token if necessary
+          localStorage.setItem("accessToken", data.access);
+
+          // Redirect to the dashboard
+          router.push("/dashboard"); // Navigate to dashboard
+        }
       } else {
         toast.error(data.error || "Something went wrong!");
       }
