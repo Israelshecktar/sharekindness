@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'corsheaders',  # Enable CORS
     'kindness',
+    'rest_framework_simplejwt.token_blacklist',
 ]
 
 MIDDLEWARE = [

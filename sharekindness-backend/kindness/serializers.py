@@ -29,7 +29,7 @@ class DonationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Donation
-        fields = ['id', 'donor', 'title', 'description', 'category', 'quantity', 'image', 'status', 'created_at']
+        fields = ['id', 'donor', 'item_name', 'description', 'category', 'quantity', 'image', 'status', 'created_at']
 
 # Request Serializer
 class RequestSerializer(serializers.ModelSerializer):

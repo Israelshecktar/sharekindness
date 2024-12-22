@@ -29,7 +29,7 @@ class Donation(models.Model):
         ('OTHER', 'Other'),
     ]
     donor = models.ForeignKey(User, on_delete=models.CASCADE, related_name='donations')
-    title = models.CharField(max_length=100)
+    item_name = models.CharField(max_length=100)
     description = models.TextField()
     category = models.CharField(max_length=20, choices=CATEGORY_CHOICES, default='OTHER')
     quantity = models.PositiveIntegerField(default=1)  # New field for quantity
@@ -42,7 +42,7 @@ class Donation(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.title} ({self.get_status_display()})"
+        return f"{self.item_name} ({self.get_status_display()})"
 
 
 # 3⃣ Request model
@@ -59,7 +59,7 @@ class Request(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"Request by {self.user.username} for {self.donation.title} ({self.get_status_display()})"
+        return f"Request by {self.user.username} for {self.donation.item_name} ({self.get_status_display()})"
 
     class Meta:
         unique_together = ('user', 'donation')
