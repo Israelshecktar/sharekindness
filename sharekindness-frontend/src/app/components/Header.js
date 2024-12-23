@@ -5,7 +5,7 @@ const Header = () => {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
 
   return (
-    <header className="relative z-50 bg-pink-500/90 text-white p-4 shadow-md backdrop-blur-md">
+    <header className="relative z-40 bg-pink-500/90 text-white p-4 shadow-md backdrop-blur-md">
       <div className="flex justify-between items-center max-w-7xl mx-auto">
         {/* Logo Section */}
         <div className="flex items-center space-x-3">
@@ -14,7 +14,7 @@ const Header = () => {
         </div>
 
         {/* Desktop Navigation */}
-        <nav className="hidden sm:flex space-x-8 relative">
+        <nav className="hidden sm:flex space-x-8">
           <a href="#" className="flex items-center text-lg sm:text-xl hover:text-pink-300 transition">
             <HomeIcon className="w-6 h-6 mr-2" />
             <span>Home</span>
@@ -34,21 +34,11 @@ const Header = () => {
             </button>
             {isProfileOpen && (
               <div className="absolute right-0 mt-2 w-48 bg-white text-black shadow-lg rounded-md p-2 z-50">
-                <a href="#" className="block px-4 py-2 hover:bg-gray-100">
-                  My Donations
-                </a>
-                <a href="#" className="block px-4 py-2 hover:bg-gray-100">
-                  Pendings
-                </a>
-                <a href="#" className="block px-4 py-2 hover:bg-gray-100">
-                  Received
-                </a>
-                <a href="#" className="block px-4 py-2 hover:bg-gray-100">
-                  Settings
-                </a>
-                <a href="#" className="block px-4 py-2 text-red-500 hover:bg-gray-100">
-                  Sign Out
-                </a>
+                <a href="#" className="block px-4 py-2 hover:bg-gray-100">My Donations</a>
+                <a href="#" className="block px-4 py-2 hover:bg-gray-100">Pendings</a>
+                <a href="#" className="block px-4 py-2 hover:bg-gray-100">Received</a>
+                <a href="#" className="block px-4 py-2 hover:bg-gray-100">Settings</a>
+                <a href="#" className="block px-4 py-2 text-red-500 hover:bg-gray-100">Sign Out</a>
               </div>
             )}
           </div>

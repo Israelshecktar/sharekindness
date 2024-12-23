@@ -1,6 +1,7 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
+
 # 1⃣ Custom User model
 class User(AbstractUser):
     ROLE_CHOICES = [
@@ -17,8 +18,8 @@ class User(AbstractUser):
 
     def __str__(self):
         return f"{self.email} ({self.get_role_display()})"
-    
-    
+
+
 # 2⃣ Donation model
 class Donation(models.Model):
     CATEGORY_CHOICES = [
@@ -28,17 +29,19 @@ class Donation(models.Model):
         ('ELECTRONICS', 'Electronics'),
         ('OTHER', 'Other'),
     ]
+    STATUS_CHOICES = [
+        ('AVAILABLE', 'Available'),  # Donation is available for requests.
+        ('RESERVED', 'Reserved'),  # A request has been approved but not yet claimed.
+        ('CLAIMED', 'Claimed'),  # Donation has been picked up or delivered.
+        ('EXPIRED', 'Expired'),  # Donation is no longer available.
+    ]
     donor = models.ForeignKey(User, on_delete=models.CASCADE, related_name='donations')
     item_name = models.CharField(max_length=100)
     description = models.TextField()
     category = models.CharField(max_length=20, choices=CATEGORY_CHOICES, default='OTHER')
-    quantity = models.PositiveIntegerField(default=1)  # New field for quantity
+    quantity = models.PositiveIntegerField(default=1)  # Field to track quantity
     image = models.ImageField(upload_to='donation_images/', blank=True, null=True)
-    status = models.CharField(max_length=20, choices=[
-        ('AVAILABLE', 'Available'),
-        ('PENDING', 'Pending'),
-        ('CLAIMED', 'Claimed'),
-    ], default='AVAILABLE')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='AVAILABLE')
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -48,9 +51,10 @@ class Donation(models.Model):
 # 3⃣ Request model
 class Request(models.Model):
     STATUS_CHOICES = [
-        ('PENDING', 'Pending'),
-        ('ACCEPTED', 'Accepted'),
-        ('REJECTED', 'Rejected'),
+        ('PENDING', 'Pending'),  # Request submitted, awaiting approval.
+        ('APPROVED', 'Approved'),  # Request has been approved by the donor.
+        ('REJECTED', 'Rejected'),  # Request was not approved.
+        ('CLAIMED', 'Claimed'),  # Request completed and donation received.
     ]
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='requests')
     donation = models.ForeignKey(Donation, on_delete=models.CASCADE, related_name='requests')

@@ -108,7 +108,10 @@ class BaseListCreateView(APIView):
         if serializer.is_valid():
             serializer.save(**self.get_additional_data(request))
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return handle_error("Invalid data.", status.HTTP_400_BAD_REQUEST)
+        
+        # Log detailed validation errors
+        logger.error(f"Validation failed: {serializer.errors}")
+        return Response({"error": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
     def get_additional_data(self, request):
         """Override this method to pass additional data on POST."""

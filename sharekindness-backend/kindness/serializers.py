@@ -31,6 +31,13 @@ class DonationSerializer(serializers.ModelSerializer):
         model = Donation
         fields = ['id', 'donor', 'item_name', 'description', 'category', 'quantity', 'image', 'status', 'created_at']
 
+    def validate_category(self, value):
+        valid_choices = [choice[0] for choice in Donation.CATEGORY_CHOICES]
+        if value not in valid_choices:
+            raise serializers.ValidationError(f"'{value}' is not a valid choice. Valid choices are: {valid_choices}.")
+        return value
+
+
 # Request Serializer
 class RequestSerializer(serializers.ModelSerializer):
     user = UserSerializer(read_only=True)  # User details are read-only

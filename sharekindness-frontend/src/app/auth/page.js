@@ -48,11 +48,12 @@ const AuthPage = () => {
         if (isRegister) {
           setIsRegister(false); // Reset to login after successful registration
         } else {
-          // Store token if necessary
+          // Store access and refresh tokens securely
           localStorage.setItem("accessToken", data.access);
+          localStorage.setItem("refreshToken", data.refresh);
 
           // Redirect to the dashboard
-          router.push("/dashboard"); // Navigate to dashboard
+          router.push("/dashboard");
         }
       } else {
         toast.error(data.error || "Something went wrong!");

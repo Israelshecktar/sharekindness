@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const DonationModal = ({ onClose }) => {
   const [formData, setFormData] = useState({
@@ -12,95 +14,99 @@ const DonationModal = ({ onClose }) => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleImageUpload = (e) => {
-    const files = Array.from(e.target.files);
+    const files = e.target.files;
     if (files.length > 2) {
-      alert("You can only upload a maximum of 2 pictures.");
-      return;
+      toast.error("You can only upload a maximum of 2 pictures.");
+    } else {
+      setFormData((prev) => ({ ...prev, images: Array.from(files) }));
     }
-    setFormData({ ...formData, images: files });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (formData.images.length === 0) {
-      alert("You must upload at least one image.");
+      toast.error("Please upload at least one image.");
       return;
     }
 
     setLoading(true);
-
     const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}api/donations/`;
     const formPayload = new FormData();
-    formPayload.append("category", formData.category);
-    formPayload.append("item_name", formData.itemName);
-    formPayload.append("quantity", formData.quantity);
-    formPayload.append("description", formData.description);
-    formData.images.forEach((image) => {
-      formPayload.append("images", image);
+
+    // Map itemName to item_name for backend compatibility
+    Object.entries(formData).forEach(([key, value]) => {
+      const backendKey = key === "itemName" ? "item_name" : key; // Remap field name
+      if (backendKey === "images") {
+        value.forEach((file) => formPayload.append("images", file));
+      } else {
+        formPayload.append(backendKey, value);
+      }
     });
 
     try {
       const response = await fetch(apiUrl, {
         method: "POST",
         body: formPayload,
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
       });
 
       if (!response.ok) {
-        throw new Error("Failed to submit the donation. Please try again.");
+        const errorData = await response.json();
+        const errorMessage = errorData.detail || "Failed to submit donation.";
+        toast.error(errorMessage);
+        throw new Error(errorMessage);
       }
 
-      alert("Donation submitted successfully!");
+      toast.success("Donation submitted successfully!");
       onClose();
     } catch (error) {
-      console.error(error.message);
-      alert("An error occurred while submitting your donation.");
+      toast.error(error.message);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+    <div className="fixed inset-0 flex items-center justify-center bg-black/70 z-50">
       <div className="bg-white rounded-lg p-6 w-11/12 max-w-lg relative">
         <button
           onClick={onClose}
           className="absolute top-4 right-4 text-gray-700 hover:text-red-500"
+          aria-label="Close"
         >
           ✕
         </button>
 
-        <h2 className="text-2xl font-bold mb-4 text-pink-500 text-center">
-          Make a Donation
-        </h2>
+        <h2 className="text-2xl font-bold mb-4 text-pink-500 text-center">Make a Donation</h2>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Category Field */}
           <div>
             <label className="block text-gray-700 mb-2">Category</label>
             <select
               name="category"
               value={formData.category}
               onChange={handleInputChange}
-              className="w-full border border-gray-300 p-2 rounded-md text-black focus:outline-none focus:ring-2 focus:ring-pink-500"
+              className="w-full border border-gray-300 p-2 rounded-md focus:ring-2 text-black focus:ring-pink-500"
               required
             >
               <option value="" disabled>
                 Select a category
               </option>
-              <option value="food">Food</option>
-              <option value="clothes">Clothes</option>
-              <option value="books">Books</option>
-              <option value="electronics">Electronics</option>
-              <option value="other">Other</option>
+              <option value="FOOD">Food</option>
+              <option value="CLOTHES">Clothes</option>
+              <option value="BOOKS">Books</option>
+              <option value="ELECTRONICS">Electronics</option>
+              <option value="OTHER">Other</option>
             </select>
           </div>
 
-          {/* Item Name Field */}
           <div>
             <label className="block text-gray-700 mb-2">Item Name</label>
             <input
@@ -108,13 +114,12 @@ const DonationModal = ({ onClose }) => {
               name="itemName"
               value={formData.itemName}
               onChange={handleInputChange}
-              className="w-full border border-gray-300 p-2 rounded-md text-black focus:outline-none focus:ring-2 focus:ring-pink-500"
+              className="w-full border border-gray-300 p-2 rounded-md text-black focus:ring-2 focus:ring-pink-500"
               placeholder="Enter the item name"
               required
             />
           </div>
 
-          {/* Quantity Field */}
           <div>
             <label className="block text-gray-700 mb-2">Quantity</label>
             <input
@@ -122,28 +127,25 @@ const DonationModal = ({ onClose }) => {
               name="quantity"
               value={formData.quantity}
               onChange={handleInputChange}
+              className="w-full border border-gray-300 p-2 rounded-md text-black focus:ring-2 focus:ring-pink-500"
               min="1"
-              className="w-full border border-gray-300 p-2 rounded-md text-black focus:outline-none focus:ring-2 focus:ring-pink-500"
-              placeholder="Enter quantity"
               required
             />
           </div>
 
-          {/* Description Field */}
           <div>
             <label className="block text-gray-700 mb-2">Description</label>
             <textarea
               name="description"
               value={formData.description}
               onChange={handleInputChange}
-              className="w-full border border-gray-300 p-2 rounded-md text-black focus:outline-none focus:ring-2 focus:ring-pink-500"
-              placeholder="Provide a brief description of the item(s)"
+              className="w-full border border-gray-300 p-2 rounded-md focus:ring-2 text-black focus:ring-pink-500"
               rows="3"
+              placeholder="Provide a brief description of the item(s)"
               required
             ></textarea>
           </div>
 
-          {/* Image Upload Field */}
           <div>
             <label className="block text-gray-700 mb-2">Attach Pictures (Max 2)</label>
             <input
@@ -151,15 +153,12 @@ const DonationModal = ({ onClose }) => {
               accept="image/*"
               multiple
               onChange={handleImageUpload}
-              className="w-full border border-gray-300 p-2 rounded-md focus:outline-none focus:ring-2 text-black focus:ring-pink-500"
+              className="w-full border border-gray-300 p-2 rounded-md focus:ring-2 text-black focus:ring-pink-500"
               required
             />
-            <p className="text-sm text-gray-500 mt-1">
-              Upload 1-2 images to represent your donation.
-            </p>
+            <p className="text-sm text-gray-500 mt-1">Upload up to 2 images.</p>
           </div>
 
-          {/* Submit Button */}
           <div className="text-center">
             <button
               type="submit"
@@ -171,6 +170,8 @@ const DonationModal = ({ onClose }) => {
           </div>
         </form>
       </div>
+
+      <ToastContainer position="top-right" autoClose={3000} />
     </div>
   );
 };
