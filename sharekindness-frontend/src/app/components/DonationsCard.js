@@ -1,24 +1,52 @@
 const DonationCard = ({ title, category, quantity, image, status }) => {
+  const formatText = (text) =>
+    text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
+
   return (
-    <div className="p-4 bg-white shadow-lg rounded-lg border border-gray-200 hover:shadow-xl transition-all">
+    <div className="p-6 bg-white shadow-lg rounded-lg border border-gray-200 hover:shadow-xl transition-all transform hover:-translate-y-2">
       {/* Donation Image */}
       {image ? (
-        <img src={image} alt={title} className="w-full h-40 object-cover rounded-md mb-4" />
+        <img
+          src={image}
+          alt={title}
+          className="w-full h-48 object-cover rounded-md mb-4"
+        />
       ) : (
-        <div className="w-full h-40 bg-gray-300 flex items-center justify-center rounded-md mb-4">
-          <span className="text-gray-600 text-sm">No Image</span>
+        <div className="w-full h-48 bg-gradient-to-r from-gray-300 to-gray-400 flex items-center justify-center rounded-md mb-4">
+          <span className="text-gray-600 text-sm">No Image Available</span>
         </div>
       )}
 
-      {/* Title and Details */}
-      <h4 className="text-lg font-bold text-pink-600 mb-2">{title}</h4>
-      <p className="text-sm text-gray-700 mb-1">Category: {category}</p>
-      <p className="text-sm text-gray-700 mb-1">Quantity: {quantity}</p>
-      <p className="text-sm text-gray-700 mb-2">Status: {status}</p>
+      {/* Title */}
+      <h4 className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-yellow-500 mb-2">
+        {title}
+      </h4>
+
+      {/* Details */}
+      <div className="text-gray-700 text-sm space-y-1 mb-4">
+        <p>
+          <span className="font-semibold text-gray-900">Category:</span>{" "}
+          {formatText(category)}
+        </p>
+        <p>
+          <span className="font-semibold text-gray-900">Quantity:</span>{" "}
+          {quantity}
+        </p>
+        <p>
+          <span className="font-semibold text-gray-900">Status:</span>{" "}
+          <span
+            className={`${
+              status === "AVAILABLE" ? "text-green-500" : "text-red-500"
+            }`}
+          >
+            {formatText(status)}
+          </span>
+        </p>
+      </div>
 
       {/* Action Button */}
-      <button 
-        className="mt-3 w-full bg-pink-500 py-2 rounded-md hover:bg-pink-600 transition-all"
+      <button
+        className="w-full py-3 text-white font-semibold rounded-md bg-gradient-to-r from-pink-500 to-yellow-500 hover:from-pink-600 hover:to-yellow-600 transition-all"
       >
         Request
       </button>

@@ -40,7 +40,7 @@ const DonationModal = ({ onClose }) => {
 
     // Map itemName to item_name for backend compatibility
     Object.entries(formData).forEach(([key, value]) => {
-      const backendKey = key === "itemName" ? "item_name" : key; // Remap field name
+      const backendKey = key === "itemName" ? "item_name" : key;
       if (backendKey === "images") {
         value.forEach((file) => formPayload.append("images", file));
       } else {
@@ -65,13 +65,21 @@ const DonationModal = ({ onClose }) => {
       }
 
       toast.success("Donation submitted successfully!");
-      onClose();
+
+      // Delay for 3 seconds before redirection
+      setTimeout(() => {
+        onClose(); // Redirects to dashboard or closes modal
+      }, 3000);
     } catch (error) {
       toast.error(error.message);
     } finally {
       setLoading(false);
     }
   };
+
+  // Determine toast position based on screen size
+  const isSmallScreen = typeof window !== "undefined" && window.innerWidth <= 640;
+  const toastPosition = isSmallScreen ? "top-right" : "bottom-right";
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black/70 z-50">
@@ -171,7 +179,18 @@ const DonationModal = ({ onClose }) => {
         </form>
       </div>
 
-      <ToastContainer position="top-right" autoClose={3000} />
+      <ToastContainer
+        position={toastPosition}
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        style={{ zIndex: 9999 }}
+      />
     </div>
   );
 };

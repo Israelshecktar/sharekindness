@@ -1,19 +1,60 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import CategoryFilter from "./CategoryFilter";
 import DonationCard from "./DonationsCard";
 import SearchBar from "./SearchBar";
+import { toast, ToastContainer } from "react-toastify";
 
-const DonationsGrid = ({ donations }) => {
+const DonationsGrid = () => {
+  const [donations, setDonations] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
+  const [loading, setLoading] = useState(false);
 
+  // Categories (Sentence case for UI)
   const categories = ["All", "Food", "Clothes", "Books", "Electronics", "Other"];
 
-  // Filter donations by category and search
+  // Fetch donations from backend
+  useEffect(() => {
+    const fetchDonations = async () => {
+      setLoading(true);
+      const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}api/donations/`;
+
+      try {
+        const response = await fetch(apiUrl, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+          },
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          const errorMessage = errorData.detail || "Failed to fetch donations.";
+          toast.error(errorMessage);
+          throw new Error(errorMessage);
+        }
+
+        const data = await response.json();
+        setDonations(data);
+      } catch (error) {
+        toast.error(error.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDonations();
+  }, []);
+
+  // Convert category to uppercase for backend filtering
+  const formatCategoryForBackend = (category) =>
+    category === "All" ? category : category.toUpperCase();
+
+  // Filter donations by category and search query
   const filteredDonations = donations.filter((donation) => {
+    const backendCategory = formatCategoryForBackend(selectedCategory);
     const matchesCategory =
-      selectedCategory === "All" || donation.category === selectedCategory;
-    const matchesSearch = donation.title
+      backendCategory === "All" || donation.category === backendCategory;
+    const matchesSearch = donation.item_name
       .toLowerCase()
       .includes(searchQuery.toLowerCase());
     return matchesCategory && matchesSearch;
@@ -21,8 +62,9 @@ const DonationsGrid = ({ donations }) => {
 
   return (
     <section className="p-4 bg-blue-100 min-h-screen">
-      
-      {/* Category Filter (Horizontal Scroll for Mobile) */}
+      <ToastContainer position="top-right" autoClose={3000} />
+
+      {/* Category Filter for mobile */}
       <div className="block sm:hidden mb-4">
         <div className="flex overflow-x-scroll scrollbar-hide space-x-4 p-2">
           {categories.map((category) => (
@@ -31,8 +73,8 @@ const DonationsGrid = ({ donations }) => {
               onClick={() => setSelectedCategory(category)}
               className={`flex-shrink-0 px-4 py-2 text-sm font-semibold rounded-full 
                 ${
-                  selectedCategory === category 
-                    ? "bg-pink-600 text-white" 
+                  selectedCategory === category
+                    ? "bg-pink-600 text-white"
                     : "bg-blue-200 text-blue-800 hover:bg-blue-300"
                 } 
                 transition-colors`}
@@ -43,7 +85,7 @@ const DonationsGrid = ({ donations }) => {
         </div>
       </div>
 
-      {/* Filter & Search (For Larger Screens) */}
+      {/* Category Filter and Search for larger screens */}
       <div className="hidden sm:flex flex-row text-black justify-between items-center mb-6 gap-4">
         <CategoryFilter
           categories={categories}
@@ -55,11 +97,15 @@ const DonationsGrid = ({ donations }) => {
 
       {/* Donations Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-        {filteredDonations.length > 0 ? (
+        {loading ? (
+          <p className="text-center text-gray-500 col-span-full">
+            Loading donations...
+          </p>
+        ) : filteredDonations.length > 0 ? (
           filteredDonations.map((donation) => (
             <DonationCard
               key={donation.id}
-              title={donation.title}
+              title={donation.item_name}
               category={donation.category}
               quantity={donation.quantity}
               image={donation.image || null}

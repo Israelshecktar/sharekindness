@@ -5,7 +5,7 @@ const Header = () => {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
 
   return (
-    <header className="relative z-40 bg-pink-500/90 text-white p-4 shadow-md backdrop-blur-md">
+    <header className="hidden sm:block relative z-40 bg-pink-500/90 text-white p-4 shadow-md backdrop-blur-md">
       <div className="flex justify-between items-center max-w-7xl mx-auto">
         {/* Logo Section */}
         <div className="flex items-center space-x-3">
@@ -33,7 +33,7 @@ const Header = () => {
               <span>Profile</span>
             </button>
             {isProfileOpen && (
-              <div className="absolute right-0 mt-2 w-48 bg-white text-black shadow-lg rounded-md p-2 z-50">
+              <div className="absolute right-0 mt-2 w-48 bg-white text-black shadow-lg rounded-md p-2 z-10">
                 <a href="#" className="block px-4 py-2 hover:bg-gray-100">My Donations</a>
                 <a href="#" className="block px-4 py-2 hover:bg-gray-100">Pendings</a>
                 <a href="#" className="block px-4 py-2 hover:bg-gray-100">Received</a>
