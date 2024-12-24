@@ -1,8 +1,37 @@
 import { useState } from "react";
 import { HomeIcon, GiftIcon, UserIcon } from "@heroicons/react/24/outline";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const Header = () => {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+
+  // Logout Function
+  const handleLogout = async () => {
+    try {
+      const refresh = localStorage.getItem("refreshToken"); // Get the refresh token from localStorage
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}api/logout/`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`, // Access token from localStorage
+        },
+        body: JSON.stringify({ refresh }),
+      });
+
+      if (response.ok) {
+        toast.success("Logout successful!");
+        localStorage.removeItem("accessToken"); // Clear tokens
+        localStorage.removeItem("refreshToken");
+        window.location.href = "/auth"; // Redirect to home or login page
+      } else {
+        const data = await response.json();
+        toast.error(data.detail || "Logout failed!");
+      }
+    } catch (error) {
+      toast.error("An error occurred during logout!");
+    }
+  };
 
   return (
     <header className="hidden sm:block relative z-40 bg-pink-500/90 text-white p-4 shadow-md backdrop-blur-md">
@@ -38,7 +67,12 @@ const Header = () => {
                 <a href="#" className="block px-4 py-2 hover:bg-gray-100">Pendings</a>
                 <a href="#" className="block px-4 py-2 hover:bg-gray-100">Received</a>
                 <a href="#" className="block px-4 py-2 hover:bg-gray-100">Settings</a>
-                <a href="#" className="block px-4 py-2 text-red-500 hover:bg-gray-100">Sign Out</a>
+                <button
+                  onClick={handleLogout}
+                  className="block w-full text-left px-4 py-2 text-red-500 hover:bg-gray-100"
+                >
+                  Sign Out
+                </button>
               </div>
             )}
           </div>

@@ -72,26 +72,39 @@ class LogoutView(APIView):
 
     def post(self, request):
         """
-        Invalidate the refresh token to log out the user.
+        Log out the user by blacklisting the provided refresh token.
         """
         refresh_token = request.data.get("refresh")
 
         if not refresh_token:
-            logger.warning("Logout attempt without refresh token.")
-            return handle_error("Refresh token is required.", status.HTTP_400_BAD_REQUEST)
+            logger.warning("Logout attempt without a refresh token.")
+            return Response(
+                {"error": "Refresh token is required for logout."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
         try:
             token = RefreshToken(refresh_token)
             # Blacklist the token
             token.blacklist()
-            logger.info(f"Token blacklisted for user {request.user.id}")
-            return Response({"message": "Logout successful."}, status=status.HTTP_200_OK)
+            logger.info(f"Token successfully blacklisted for user {request.user.id}")
+            return Response(
+                {"message": "Logout successful."},
+                status=status.HTTP_200_OK,
+            )
         except TokenError as e:
-            logger.error(f"TokenError during logout: {str(e)}")
-            return handle_error("Invalid refresh token.", status.HTTP_400_BAD_REQUEST)
+            logger.error(f"Invalid token provided for logout: {str(e)}")
+            return Response(
+                {"error": "Invalid or expired refresh token."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         except Exception as e:
-            logger.error(f"Unexpected error during logout: {str(e)}")
-            return handle_error("Something went wrong during logout.", status.HTTP_500_INTERNAL_SERVER_ERROR)
+            logger.exception("Unexpected error during logout.")
+            return Response(
+                {"error": "An error occurred during logout."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
 
 # Base Class for List/Create Views
 class BaseListCreateView(APIView):

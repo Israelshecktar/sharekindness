@@ -1,9 +1,38 @@
 import { useState } from "react";
 import { HomeIcon, GiftIcon, UserIcon } from "@heroicons/react/24/outline";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const Footer = () => {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState("My Donations"); // Track the active tab
+  const [activeTab, setActiveTab] = useState("My Donations");
+
+  // Logout Function (reused from Header)
+  const handleLogout = async () => {
+    try {
+      const refresh = localStorage.getItem("refreshToken");
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}api/logout/`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
+        body: JSON.stringify({ refresh }),
+      });
+
+      if (response.ok) {
+        toast.success("Logout successful!");
+        localStorage.removeItem("accessToken");
+        localStorage.removeItem("refreshToken");
+        window.location.href = "/auth";
+      } else {
+        const data = await response.json();
+        toast.error(data.detail || "Logout failed!");
+      }
+    } catch (error) {
+      toast.error("An error occurred during logout!");
+    }
+  };
 
   return (
     <footer className="bg-gray-800 text-white text-center p-4 fixed bottom-0 w-full sm:relative">
@@ -33,13 +62,13 @@ const Footer = () => {
           <div className="bg-white rounded-lg p-6 w-10/12 max-w-xs">
             {/* Modal Header */}
             <h2 className="text-lg font-bold mb-4">Profile</h2>
-            
+
             {/* Modal Navigation Links */}
             <nav className="space-y-4">
-              {["My Donations", "Pendings", "Received", "Settings", "Sign Out"].map((tab) => (
+              {["My Donations", "Pendings", "Received", "Settings"].map((tab) => (
                 <button
                   key={tab}
-                  onClick={() => setActiveTab(tab)} // Update active tab
+                  onClick={() => setActiveTab(tab)}
                   className={`block text-left w-full px-4 py-2 rounded-lg ${
                     activeTab === tab
                       ? "bg-gray-200 text-gray-900 font-semibold"
@@ -49,8 +78,15 @@ const Footer = () => {
                   {tab}
                 </button>
               ))}
+              {/* Sign Out */}
+              <button
+                onClick={handleLogout}
+                className="block text-left w-full px-4 py-2 rounded-lg text-red-500 hover:bg-gray-100"
+              >
+                Sign Out
+              </button>
             </nav>
-            
+
             {/* Close Button */}
             <button
               onClick={() => setIsProfileOpen(false)}
