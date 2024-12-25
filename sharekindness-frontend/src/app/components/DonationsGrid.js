@@ -114,7 +114,7 @@ const DonationsGrid = () => {
           ))
         ) : (
           <p className="text-center text-gray-500 col-span-full">
-            No donations match your search.
+            No donations match your search or perhaps you need to <a href="/auth" className="text-pink-600">Sign In</a>
           </p>
         )}
       </div>
