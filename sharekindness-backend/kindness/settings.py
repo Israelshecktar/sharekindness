@@ -109,6 +109,11 @@ USE_TZ = True
 # --- Static Files (CSS, JavaScript, Images) ---
 STATIC_URL = 'static/'
 
+# --- Media Files (Uploaded Files) ---
+MEDIA_URL = '/media/'  # Public-facing URL for accessing media files
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')  # Local directory where uploaded files are stored
+
+
 # --- Default primary key field type ---
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
