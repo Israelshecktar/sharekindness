@@ -42,12 +42,7 @@ const DonationsGrid = () => {
             ? donation.image
             : `${process.env.NEXT_PUBLIC_API_URL.replace(/\/$/, "")}/${donation.image.replace(/^\//, "")}`,
         }));
-        
-        
-
-        
-        
-
+      
         setDonations(donationsWithAbsoluteImages);
       } catch (error) {
         toast.error(error.message);

@@ -1,15 +1,16 @@
 const DonationCard = ({ title, category, quantity, image, status }) => {
+  // Helper function to format text
   const formatText = (text) =>
     text ? text.charAt(0).toUpperCase() + text.slice(1).toLowerCase() : "";
 
-  // Ensure no double slashes by removing leading slash from `image`
-  const sanitizedImage =
-    image && image.startsWith("/") ? image.substring(1) : image;
-
-  // Construct full image URL
-  const imageUrl = sanitizedImage
-    ? `${process.env.NEXT_PUBLIC_API_URL}${sanitizedImage}`
+  // Use `image` directly if it's already a full URL
+  const imageUrl = image?.startsWith("http")
+    ? image
+    : image
+    ? `${process.env.NEXT_PUBLIC_API_URL}/${image.replace(/^\//, "")}`
     : null;
+
+  console.log("Constructed Image URL:", imageUrl); // Debugging log
 
   return (
     <div className="p-6 bg-white shadow-lg rounded-lg border border-gray-200 hover:shadow-xl transition-all transform hover:-translate-y-2">
