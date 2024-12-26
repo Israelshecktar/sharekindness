@@ -34,7 +34,21 @@ const DonationsGrid = () => {
         }
 
         const data = await response.json();
-        setDonations(data);
+
+        // Ensure absolute URLs for images
+        const donationsWithAbsoluteImages = data.map((donation) => ({
+          ...donation,
+          image: donation.image.startsWith("http")
+            ? donation.image
+            : `${process.env.NEXT_PUBLIC_API_URL.replace(/\/$/, "")}/${donation.image.replace(/^\//, "")}`,
+        }));
+        
+        
+
+        
+        
+
+        setDonations(donationsWithAbsoluteImages);
       } catch (error) {
         toast.error(error.message);
       } finally {
@@ -108,13 +122,16 @@ const DonationsGrid = () => {
               title={donation.item_name}
               category={donation.category}
               quantity={donation.quantity}
-              image={donation.image || null}
+              image={donation.image} // absolute image URL
               status={donation.status}
             />
           ))
         ) : (
           <p className="text-center text-gray-500 col-span-full">
-            No donations match your search or perhaps you need to <a href="/auth" className="text-pink-600">Sign In</a>
+            No donations match your search or perhaps you need to{" "}
+            <a href="/auth" className="text-pink-600">
+              Sign In
+            </a>
           </p>
         )}
       </div>

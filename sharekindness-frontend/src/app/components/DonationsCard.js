@@ -1,15 +1,25 @@
 const DonationCard = ({ title, category, quantity, image, status }) => {
   const formatText = (text) =>
-    text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
+    text ? text.charAt(0).toUpperCase() + text.slice(1).toLowerCase() : "";
+
+  // Ensure no double slashes by removing leading slash from `image`
+  const sanitizedImage =
+    image && image.startsWith("/") ? image.substring(1) : image;
+
+  // Construct full image URL
+  const imageUrl = sanitizedImage
+    ? `${process.env.NEXT_PUBLIC_API_URL}${sanitizedImage}`
+    : null;
 
   return (
     <div className="p-6 bg-white shadow-lg rounded-lg border border-gray-200 hover:shadow-xl transition-all transform hover:-translate-y-2">
       {/* Donation Image */}
-      {image ? (
+      {imageUrl ? (
         <img
-          src={image}
-          alt={title}
+          src={imageUrl}
+          alt={title || "Donation image"}
           className="w-full h-48 object-cover rounded-md mb-4"
+          loading="lazy"
         />
       ) : (
         <div className="w-full h-48 bg-gradient-to-r from-gray-300 to-gray-400 flex items-center justify-center rounded-md mb-4">
@@ -19,7 +29,7 @@ const DonationCard = ({ title, category, quantity, image, status }) => {
 
       {/* Title */}
       <h4 className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-yellow-500 mb-2">
-        {title}
+        {formatText(title)}
       </h4>
 
       {/* Details */}
@@ -47,6 +57,7 @@ const DonationCard = ({ title, category, quantity, image, status }) => {
       {/* Action Button */}
       <button
         className="w-full py-3 text-white font-semibold rounded-md bg-gradient-to-r from-pink-500 to-yellow-500 hover:from-pink-600 hover:to-yellow-600 transition-all"
+        aria-label={`Request ${title || "donation"}`}
       >
         Request
       </button>
