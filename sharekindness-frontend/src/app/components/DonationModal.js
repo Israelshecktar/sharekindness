@@ -8,8 +8,9 @@ const DonationModal = ({ onClose }) => {
     itemName: "",
     quantity: 1,
     description: "",
-    images: [],
+    image: [], // Backend expects 'image' as the key
   });
+  const [imagePreviews, setImagePreviews] = useState([]); // For image previews
   const [loading, setLoading] = useState(false);
 
   const handleInputChange = (e) => {
@@ -18,18 +19,23 @@ const DonationModal = ({ onClose }) => {
   };
 
   const handleImageUpload = (e) => {
-    const files = e.target.files;
+    const files = Array.from(e.target.files);
+
+    // Validate image count
     if (files.length > 2) {
       toast.error("You can only upload a maximum of 2 pictures.");
-    } else {
-      setFormData((prev) => ({ ...prev, images: Array.from(files) }));
+      return;
     }
+
+    setFormData((prev) => ({ ...prev, image: files })); // Update image in formData
+    setImagePreviews(files.map((file) => URL.createObjectURL(file))); // Generate image previews
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (formData.images.length === 0) {
+    // Ensure at least one image is uploaded
+    if (formData.image.length === 0) {
       toast.error("Please upload at least one image.");
       return;
     }
@@ -38,11 +44,11 @@ const DonationModal = ({ onClose }) => {
     const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}api/donations/`;
     const formPayload = new FormData();
 
-    // Map itemName to item_name for backend compatibility
+    // Append form data
     Object.entries(formData).forEach(([key, value]) => {
-      const backendKey = key === "itemName" ? "item_name" : key;
-      if (backendKey === "images") {
-        value.forEach((file) => formPayload.append("images", file));
+      const backendKey = key === "itemName" ? "item_name" : key; // Map 'itemName' to 'item_name' for backend compatibility
+      if (backendKey === "image") {
+        value.forEach((file) => formPayload.append("image", file)); // Append images individually
       } else {
         formPayload.append(backendKey, value);
       }
@@ -53,23 +59,18 @@ const DonationModal = ({ onClose }) => {
         method: "POST",
         body: formPayload,
         headers: {
-          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`, // Include authorization token
         },
       });
 
       if (!response.ok) {
         const errorData = await response.json();
-        const errorMessage = errorData.detail || "Failed to submit donation.";
-        toast.error(errorMessage);
-        throw new Error(errorMessage);
+        toast.error(errorData.detail || "Failed to submit donation.");
+        throw new Error(errorData.detail || "Failed to submit donation.");
       }
 
       toast.success("Donation submitted successfully!");
-
-      // Delay for 3 seconds before redirection
-      setTimeout(() => {
-        onClose(); // Redirects to dashboard or closes modal
-      }, 3000);
+      setTimeout(onClose, 3000); // Close modal after successful submission
     } catch (error) {
       toast.error(error.message);
     } finally {
@@ -77,7 +78,6 @@ const DonationModal = ({ onClose }) => {
     }
   };
 
-  // Determine toast position based on screen size
   const isSmallScreen = typeof window !== "undefined" && window.innerWidth <= 640;
   const toastPosition = isSmallScreen ? "top-right" : "bottom-right";
 
@@ -165,6 +165,18 @@ const DonationModal = ({ onClose }) => {
               required
             />
             <p className="text-sm text-gray-500 mt-1">Upload up to 2 images.</p>
+
+            {/* Preview Section */}
+            <div className="mt-4 flex space-x-4">
+              {imagePreviews.map((src, index) => (
+                <img
+                  key={index}
+                  src={src}
+                  alt={`Preview ${index + 1}`}
+                  className="w-20 h-20 object-cover rounded-md border"
+                />
+              ))}
+            </div>
           </div>
 
           <div className="text-center">

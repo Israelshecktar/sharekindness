@@ -156,14 +156,24 @@ class BaseDetailView(APIView):
             status=status.HTTP_204_NO_CONTENT,
         )
 
-# 4⃣ Donation Views
+# Donation Views
 class DonationListCreateView(BaseListCreateView):
     permission_classes = [IsAuthenticated]
     model = Donation
     serializer_class = DonationSerializer
 
-    def get_additional_data(self, request):
-        return {"donor": request.user}
+    def post(self, request):
+        logger.info(f"Received files: {request.FILES}")  # Log received files
+        logger.info(f"Received data: {request.data}")    # Log received data
+
+        serializer = self.serializer_class(data=request.data, context={'request': request})
+        if serializer.is_valid():
+            serializer.save(donor=request.user)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        # Log detailed validation errors
+        logger.error(f"Validation failed: {serializer.errors}")
+        return Response({"error": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+
 
 class DonationDetailView(BaseDetailView):
     permission_classes = [IsAuthenticated]

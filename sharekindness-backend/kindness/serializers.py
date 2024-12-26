@@ -31,11 +31,19 @@ class DonationSerializer(serializers.ModelSerializer):
         model = Donation
         fields = ['id', 'donor', 'item_name', 'description', 'category', 'quantity', 'image', 'status', 'created_at']
 
+    def validate(self, data):
+        # Ensure at least one image is provided in the request
+        request = self.context.get("request")
+        if not request or not request.FILES.get('image'):
+            raise serializers.ValidationError({"image": "At least one image is required."})
+        return data
+
     def validate_category(self, value):
         valid_choices = [choice[0] for choice in Donation.CATEGORY_CHOICES]
         if value not in valid_choices:
             raise serializers.ValidationError(f"'{value}' is not a valid choice. Valid choices are: {valid_choices}.")
         return value
+
 
 
 # Request Serializer
