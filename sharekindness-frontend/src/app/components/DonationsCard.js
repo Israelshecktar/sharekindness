@@ -1,4 +1,10 @@
-const DonationCard = ({ title, category, quantity, image, status }) => {
+import { useState } from "react";
+import DonationRequestModal from "./DonationRequestModal"; // Import the correct modal
+
+const DonationCard = ({ id, title, category, quantity, image, status }) => {
+  const [isRequestModalOpen, setIsRequestModalOpen] = useState(false);
+  const [isImageModalOpen, setIsImageModalOpen] = useState(false);
+
   // Helper function to format text
   const formatText = (text) =>
     text ? text.charAt(0).toUpperCase() + text.slice(1).toLowerCase() : "";
@@ -10,7 +16,10 @@ const DonationCard = ({ title, category, quantity, image, status }) => {
     ? `${process.env.NEXT_PUBLIC_API_URL}/${image.replace(/^\//, "")}`
     : null;
 
-  console.log("Constructed Image URL:", imageUrl); // Debugging log
+  const handleOpenRequestModal = () => setIsRequestModalOpen(true);
+  const handleCloseRequestModal = () => setIsRequestModalOpen(false);
+  const handleOpenImageModal = () => setIsImageModalOpen(true);
+  const handleCloseImageModal = () => setIsImageModalOpen(false);
 
   return (
     <div className="p-6 bg-white shadow-lg rounded-lg border border-gray-200 hover:shadow-xl transition-all transform hover:-translate-y-2">
@@ -19,8 +28,9 @@ const DonationCard = ({ title, category, quantity, image, status }) => {
         <img
           src={imageUrl}
           alt={title || "Donation image"}
-          className="w-full h-48 object-cover rounded-md mb-4"
+          className="w-full h-48 object-cover rounded-md mb-4 cursor-pointer"
           loading="lazy"
+          onClick={handleOpenImageModal} // Open the image modal on click
         />
       ) : (
         <div className="w-full h-48 bg-gradient-to-r from-gray-300 to-gray-400 flex items-center justify-center rounded-md mb-4">
@@ -57,11 +67,47 @@ const DonationCard = ({ title, category, quantity, image, status }) => {
 
       {/* Action Button */}
       <button
+        onClick={handleOpenRequestModal}
         className="w-full py-3 text-white font-semibold rounded-md bg-gradient-to-r from-pink-500 to-yellow-500 hover:from-pink-600 hover:to-yellow-600 transition-all"
         aria-label={`Request ${title || "donation"}`}
       >
         Request
       </button>
+
+      {/* Request Modal */}
+      {isRequestModalOpen && (
+        <DonationRequestModal
+          donation={{
+            id,
+            title,
+            quantity,
+          }}
+          onClose={handleCloseRequestModal}
+        />
+      )}
+
+      {/* Image Modal */}
+      {isImageModalOpen && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-70 z-50">
+          <div className="relative">
+            {/* Close Button */}
+            <button
+              onClick={handleCloseImageModal}
+              className="absolute top-4 right-4 text-white bg-gray-800 rounded-full p-2 hover:bg-gray-600"
+              aria-label="Close Image Modal"
+            >
+              ✕
+            </button>
+
+            {/* Full Image */}
+            <img
+              src={imageUrl}
+              alt={title || "Donation full-size image"}
+              className="max-w-full max-h-screen rounded-lg shadow-lg"
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 };
