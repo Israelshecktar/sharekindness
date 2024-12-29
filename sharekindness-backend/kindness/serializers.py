@@ -44,8 +44,6 @@ class DonationSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(f"'{value}' is not a valid choice. Valid choices are: {valid_choices}.")
         return value
 
-
-
 # Request Serializer
 class RequestSerializer(serializers.ModelSerializer):
     user = UserSerializer(read_only=True)  # User details are read-only
@@ -53,4 +51,10 @@ class RequestSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Request
-        fields = ['id', 'user', 'donation', 'status', 'message', 'created_at']
+        fields = ['id', 'user', 'donation', 'status', 'comments', 'requested_quantity', 'created_at']
+
+    def validate_requested_quantity(self, value):
+        # Ensure requested quantity is a positive integer
+        if value <= 0:
+            raise serializers.ValidationError("Requested quantity must be a positive number.")
+        return value

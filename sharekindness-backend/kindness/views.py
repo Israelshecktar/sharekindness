@@ -4,7 +4,6 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken, TokenError
-from rest_framework_simplejwt.token_blacklist.models import BlacklistedToken
 from django.contrib.auth import authenticate, get_user_model
 from django.shortcuts import get_object_or_404
 from .serializers import (
@@ -18,12 +17,14 @@ from .models import Donation, Request
 logger = logging.getLogger(__name__)
 User = get_user_model()
 
+
 def handle_error(message, status_code):
-    """Helper for creating error responses and logging."""
+    """Helper function to create error responses and log messages."""
     logger.error(message)
     return Response({"error": message}, status=status_code)
 
-# 1⃣ Register View (POST /register/)
+
+# 1⃣ Register View
 class RegisterView(APIView):
     permission_classes = [AllowAny]
 
@@ -40,7 +41,8 @@ class RegisterView(APIView):
             )
         return handle_error("Invalid registration data.", status.HTTP_400_BAD_REQUEST)
 
-# 2⃣ Login View (POST /login/)
+
+# 2⃣ Login View
 class LoginView(APIView):
     permission_classes = [AllowAny]
 
@@ -51,9 +53,7 @@ class LoginView(APIView):
         if not email or not password:
             return handle_error("Email and password are required.", status.HTTP_400_BAD_REQUEST)
 
-        # Use `username=email` to pass email to the authentication backend
         user = authenticate(request, username=email, password=password)
-
         if user:
             refresh = RefreshToken.for_user(user)
             return Response(
@@ -66,47 +66,26 @@ class LoginView(APIView):
             )
         return handle_error("Invalid email or password.", status.HTTP_401_UNAUTHORIZED)
 
-# 3⃣ Logout View (POST /logout/)
+
+# 3⃣ Logout View
 class LogoutView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
-        """
-        Log out the user by blacklisting the provided refresh token.
-        """
         refresh_token = request.data.get("refresh")
-
         if not refresh_token:
-            logger.warning("Logout attempt without a refresh token.")
-            return Response(
-                {"error": "Refresh token is required for logout."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+            return handle_error("Refresh token is required for logout.", status.HTTP_400_BAD_REQUEST)
 
         try:
             token = RefreshToken(refresh_token)
-            # Blacklist the token
             token.blacklist()
             logger.info(f"Token successfully blacklisted for user {request.user.id}")
-            return Response(
-                {"message": "Logout successful."},
-                status=status.HTTP_200_OK,
-            )
-        except TokenError as e:
-            logger.error(f"Invalid token provided for logout: {str(e)}")
-            return Response(
-                {"error": "Invalid or expired refresh token."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-        except Exception as e:
-            logger.exception("Unexpected error during logout.")
-            return Response(
-                {"error": "An error occurred during logout."},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            )
+            return Response({"message": "Logout successful."}, status=status.HTTP_200_OK)
+        except TokenError:
+            return handle_error("Invalid or expired refresh token.", status.HTTP_400_BAD_REQUEST)
 
 
-# Base Class for List/Create Views
+# 4⃣ Base List/Create View
 class BaseListCreateView(APIView):
     model = None
     serializer_class = None
@@ -121,16 +100,14 @@ class BaseListCreateView(APIView):
         if serializer.is_valid():
             serializer.save(**self.get_additional_data(request))
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-        
-        # Log detailed validation errors
-        logger.error(f"Validation failed: {serializer.errors}")
-        return Response({"error": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+        return handle_error(serializer.errors, status.HTTP_400_BAD_REQUEST)
 
     def get_additional_data(self, request):
-        """Override this method to pass additional data on POST."""
+        """Override to add extra data before saving."""
         return {}
 
-# Base Class for Detail Views
+
+# 5⃣ Base Detail View
 class BaseDetailView(APIView):
     model = None
     serializer_class = None
@@ -146,7 +123,7 @@ class BaseDetailView(APIView):
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
-        return handle_error("Invalid data.", status.HTTP_400_BAD_REQUEST)
+        return handle_error(serializer.errors, status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, pk):
         obj = get_object_or_404(self.model, pk=pk)
@@ -156,23 +133,20 @@ class BaseDetailView(APIView):
             status=status.HTTP_204_NO_CONTENT,
         )
 
-# Donation Views
+
+# 6⃣ Donation Views
 class DonationListCreateView(BaseListCreateView):
     permission_classes = [IsAuthenticated]
     model = Donation
     serializer_class = DonationSerializer
 
     def post(self, request):
-        logger.info(f"Received files: {request.FILES}")  # Log received files
-        logger.info(f"Received data: {request.data}")    # Log received data
-
-        serializer = self.serializer_class(data=request.data, context={'request': request})
+        serializer = self.serializer_class(data=request.data, context={"request": request})
         if serializer.is_valid():
-            serializer.save(donor=request.user)
+            donation = serializer.save(donor=request.user)
+            logger.info(f"Donation created successfully: ID={donation.id}, Name={donation.item_name}")
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-        # Log detailed validation errors
-        logger.error(f"Validation failed: {serializer.errors}")
-        return Response({"error": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+        return handle_error(serializer.errors, status.HTTP_400_BAD_REQUEST)
 
 
 class DonationDetailView(BaseDetailView):
@@ -180,7 +154,8 @@ class DonationDetailView(BaseDetailView):
     model = Donation
     serializer_class = DonationSerializer
 
-# 5⃣ Request Views
+
+# 7⃣ Request Views
 class RequestListCreateView(BaseListCreateView):
     permission_classes = [IsAuthenticated]
     model = Request
@@ -188,19 +163,51 @@ class RequestListCreateView(BaseListCreateView):
 
     def post(self, request):
         donation_id = request.data.get("donation")
+        requested_quantity = request.data.get("requested_quantity", 0)
+
+        if not donation_id:
+            return handle_error("Donation ID is required.", status.HTTP_400_BAD_REQUEST)
+
         donation = get_object_or_404(Donation, pk=donation_id)
+
+        try:
+            requested_quantity = int(requested_quantity)
+            if requested_quantity <= 0:
+                return handle_error("Requested quantity must be greater than zero.", status.HTTP_400_BAD_REQUEST)
+        except ValueError:
+            return handle_error("Invalid requested quantity format.", status.HTTP_400_BAD_REQUEST)
+
+        if donation.status != "AVAILABLE":
+            return handle_error("This donation is not available for requests.", status.HTTP_400_BAD_REQUEST)
+
+        if donation.requests.count() >= 5:
+            return handle_error("This donation is no longer accepting requests.", status.HTTP_400_BAD_REQUEST)
+
+        if requested_quantity > donation.quantity:
+            return handle_error(
+                f"Requested quantity exceeds available quantity ({donation.quantity}).",
+                status.HTTP_400_BAD_REQUEST,
+            )
+
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():
-            serializer.save(user=request.user, donation=donation)
+            request_obj = serializer.save(user=request.user, donation=donation)
+            donation.quantity -= requested_quantity
+            if donation.quantity == 0:
+                donation.status = "RESERVED"
+            donation.save()
+
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return handle_error("Invalid data.", status.HTTP_400_BAD_REQUEST)
+        return handle_error(serializer.errors, status.HTTP_400_BAD_REQUEST)
+
 
 class RequestDetailView(BaseDetailView):
     permission_classes = [IsAuthenticated]
     model = Request
     serializer_class = RequestSerializer
 
-# 6⃣ Log View (POST /log/)
+
+# 8⃣ Log View
 class LogView(APIView):
     permission_classes = [AllowAny]
 

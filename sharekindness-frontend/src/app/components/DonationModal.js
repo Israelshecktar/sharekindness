@@ -8,9 +8,9 @@ const DonationModal = ({ onClose }) => {
     itemName: "",
     quantity: 1,
     description: "",
-    image: [], // Backend expects 'image' as the key
+    image: [],
   });
-  const [imagePreviews, setImagePreviews] = useState([]); // For image previews
+  const [imagePreviews, setImagePreviews] = useState([]);
   const [loading, setLoading] = useState(false);
 
   const handleInputChange = (e) => {
@@ -21,20 +21,18 @@ const DonationModal = ({ onClose }) => {
   const handleImageUpload = (e) => {
     const files = Array.from(e.target.files);
 
-    // Validate image count
     if (files.length > 2) {
       toast.error("You can only upload a maximum of 2 pictures.");
       return;
     }
 
-    setFormData((prev) => ({ ...prev, image: files })); // Update image in formData
-    setImagePreviews(files.map((file) => URL.createObjectURL(file))); // Generate image previews
+    setFormData((prev) => ({ ...prev, image: files }));
+    setImagePreviews(files.map((file) => URL.createObjectURL(file)));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Ensure at least one image is uploaded
     if (formData.image.length === 0) {
       toast.error("Please upload at least one image.");
       return;
@@ -44,11 +42,10 @@ const DonationModal = ({ onClose }) => {
     const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}api/donations/`;
     const formPayload = new FormData();
 
-    // Append form data
     Object.entries(formData).forEach(([key, value]) => {
-      const backendKey = key === "itemName" ? "item_name" : key; // Map 'itemName' to 'item_name' for backend compatibility
+      const backendKey = key === "itemName" ? "item_name" : key;
       if (backendKey === "image") {
-        value.forEach((file) => formPayload.append("image", file)); // Append images individually
+        value.forEach((file) => formPayload.append("image", file));
       } else {
         formPayload.append(backendKey, value);
       }
@@ -59,7 +56,7 @@ const DonationModal = ({ onClose }) => {
         method: "POST",
         body: formPayload,
         headers: {
-          Authorization: `Bearer ${localStorage.getItem("accessToken")}`, // Include authorization token
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
         },
       });
 
@@ -69,17 +66,14 @@ const DonationModal = ({ onClose }) => {
         throw new Error(errorData.detail || "Failed to submit donation.");
       }
 
-      toast.success("Donation submitted successfully!");
-      setTimeout(onClose, 3000); // Close modal after successful submission
+      toast.success("Donation created successfully!");
+      setTimeout(onClose, 3000);
     } catch (error) {
-      toast.error(error.message);
+      toast.error(error.message || "An error occurred.");
     } finally {
       setLoading(false);
     }
   };
-
-  const isSmallScreen = typeof window !== "undefined" && window.innerWidth <= 640;
-  const toastPosition = isSmallScreen ? "top-right" : "bottom-right";
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black/70 z-50">
@@ -91,9 +85,7 @@ const DonationModal = ({ onClose }) => {
         >
           ✕
         </button>
-
         <h2 className="text-2xl font-bold mb-4 text-pink-500 text-center">Make a Donation</h2>
-
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-gray-700 mb-2">Category</label>
@@ -104,9 +96,7 @@ const DonationModal = ({ onClose }) => {
               className="w-full border border-gray-300 p-2 rounded-md focus:ring-2 text-black focus:ring-pink-500"
               required
             >
-              <option value="" disabled>
-                Select a category
-              </option>
+              <option value="" disabled>Select a category</option>
               <option value="FOOD">Food</option>
               <option value="CLOTHES">Clothes</option>
               <option value="BOOKS">Books</option>
@@ -114,7 +104,6 @@ const DonationModal = ({ onClose }) => {
               <option value="OTHER">Other</option>
             </select>
           </div>
-
           <div>
             <label className="block text-gray-700 mb-2">Item Name</label>
             <input
@@ -127,7 +116,6 @@ const DonationModal = ({ onClose }) => {
               required
             />
           </div>
-
           <div>
             <label className="block text-gray-700 mb-2">Quantity</label>
             <input
@@ -140,7 +128,6 @@ const DonationModal = ({ onClose }) => {
               required
             />
           </div>
-
           <div>
             <label className="block text-gray-700 mb-2">Description</label>
             <textarea
@@ -153,7 +140,6 @@ const DonationModal = ({ onClose }) => {
               required
             ></textarea>
           </div>
-
           <div>
             <label className="block text-gray-700 mb-2">Attach Pictures (Max 2)</label>
             <input
@@ -165,8 +151,6 @@ const DonationModal = ({ onClose }) => {
               required
             />
             <p className="text-sm text-gray-500 mt-1">Upload up to 2 images.</p>
-
-            {/* Preview Section */}
             <div className="mt-4 flex space-x-4">
               {imagePreviews.map((src, index) => (
                 <img
@@ -178,7 +162,6 @@ const DonationModal = ({ onClose }) => {
               ))}
             </div>
           </div>
-
           <div className="text-center">
             <button
               type="submit"
@@ -190,14 +173,12 @@ const DonationModal = ({ onClose }) => {
           </div>
         </form>
       </div>
-
       <ToastContainer
-        position={toastPosition}
+        position="top-right"
         autoClose={3000}
         hideProgressBar={false}
         newestOnTop={false}
         closeOnClick
-        rtl={false}
         pauseOnFocusLoss
         draggable
         pauseOnHover

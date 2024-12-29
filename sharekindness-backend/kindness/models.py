@@ -48,22 +48,22 @@ class Donation(models.Model):
         return f"{self.item_name} ({self.get_status_display()})"
 
 
-# 3⃣ Request model
 class Request(models.Model):
     STATUS_CHOICES = [
-        ('PENDING', 'Pending'),  # Request submitted, awaiting approval.
-        ('APPROVED', 'Approved'),  # Request has been approved by the donor.
-        ('REJECTED', 'Rejected'),  # Request was not approved.
-        ('CLAIMED', 'Claimed'),  # Request completed and donation received.
+        ('PENDING', 'Pending'),
+        ('APPROVED', 'Approved'),
+        ('REJECTED', 'Rejected'),
+        ('CLAIMED', 'Claimed'),
     ]
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='requests')
     donation = models.ForeignKey(Donation, on_delete=models.CASCADE, related_name='requests')
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='PENDING')
-    message = models.TextField(blank=True, null=True)
+    requested_quantity = models.PositiveIntegerField(default=1)
+    comments = models.CharField(max_length=255, blank=True, null=True)  # Optional comment field (50-word limit)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"Request by {self.user.username} for {self.donation.item_name} ({self.get_status_display()})"
+        return f"Request by {self.user.email} for {self.donation.item_name} ({self.get_status_display()})"
 
     class Meta:
         unique_together = ('user', 'donation')

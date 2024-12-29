@@ -10,10 +10,8 @@ const DonationsGrid = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // Categories (Sentence case for UI)
   const categories = ["All", "Food", "Clothes", "Books", "Electronics", "Other"];
 
-  // Fetch donations from backend
   useEffect(() => {
     const fetchDonations = async () => {
       setLoading(true);
@@ -28,21 +26,19 @@ const DonationsGrid = () => {
 
         if (!response.ok) {
           const errorData = await response.json();
-          const errorMessage = errorData.detail || "Failed to fetch donations.";
-          toast.error(errorMessage);
-          throw new Error(errorMessage);
+          toast.error(errorData.detail || "Failed to fetch donations.");
+          throw new Error(errorData.detail || "Failed to fetch donations.");
         }
 
         const data = await response.json();
 
-        // Ensure absolute URLs for images
         const donationsWithAbsoluteImages = data.map((donation) => ({
           ...donation,
           image: donation.image.startsWith("http")
             ? donation.image
             : `${process.env.NEXT_PUBLIC_API_URL.replace(/\/$/, "")}/${donation.image.replace(/^\//, "")}`,
         }));
-      
+
         setDonations(donationsWithAbsoluteImages);
       } catch (error) {
         toast.error(error.message);
@@ -54,11 +50,9 @@ const DonationsGrid = () => {
     fetchDonations();
   }, []);
 
-  // Convert category to uppercase for backend filtering
   const formatCategoryForBackend = (category) =>
     category === "All" ? category : category.toUpperCase();
 
-  // Filter donations by category and search query
   const filteredDonations = donations.filter((donation) => {
     const backendCategory = formatCategoryForBackend(selectedCategory);
     const matchesCategory =
@@ -73,7 +67,6 @@ const DonationsGrid = () => {
     <section className="p-4 bg-blue-100 min-h-screen">
       <ToastContainer position="top-right" autoClose={3000} />
 
-      {/* Category Filter for mobile */}
       <div className="block sm:hidden mb-4">
         <div className="flex overflow-x-scroll scrollbar-hide space-x-4 p-2">
           {categories.map((category) => (
@@ -94,7 +87,6 @@ const DonationsGrid = () => {
         </div>
       </div>
 
-      {/* Category Filter and Search for larger screens */}
       <div className="hidden sm:flex flex-row text-black justify-between items-center mb-6 gap-4">
         <CategoryFilter
           categories={categories}
@@ -104,7 +96,6 @@ const DonationsGrid = () => {
         <SearchBar onSearch={setSearchQuery} />
       </div>
 
-      {/* Donations Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
         {loading ? (
           <p className="text-center text-gray-500 col-span-full">
@@ -114,10 +105,11 @@ const DonationsGrid = () => {
           filteredDonations.map((donation) => (
             <DonationCard
               key={donation.id}
-              title={donation.item_name}
+              id={donation.id}
+              item_name={donation.item_name}
               category={donation.category}
               quantity={donation.quantity}
-              image={donation.image} // absolute image URL
+              image={donation.image}
               status={donation.status}
             />
           ))

@@ -1,42 +1,68 @@
 import { useState } from "react";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
-const DonationRequestModal = ({ donation, onClose }) => {
+const RequestModal = ({ donation, onClose }) => {
   const [quantity, setQuantity] = useState(1);
   const [comment, setComment] = useState("");
-  const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+
+  const validateQuantity = (value) => {
+    if (value > donation.quantity) return "Requested quantity exceeds available quantity.";
+    if (value < 1) return "Requested quantity must be at least 1.";
+    return "";
+  };
 
   const handleQuantityChange = (e) => {
-    const value = parseInt(e.target.value, 10);
-
-    if (value > donation.quantity) {
-      setError("Requested quantity exceeds available quantity.");
-    } else if (value < 1) {
-      setError("Requested quantity must be at least 1.");
-    } else {
-      setError(""); // Clear the error if input is valid
-    }
-
+    const value = parseInt(e.target.value, 10) || 0;
+    const errorMessage = validateQuantity(value);
+    if (errorMessage) toast.error(errorMessage);
     setQuantity(value);
   };
 
-  const handleRequestSubmit = () => {
-    if (quantity < 1 || quantity > donation.quantity) {
-      setError("Please enter a valid quantity.");
+  const handleSubmit = async () => {
+    const quantityError = validateQuantity(quantity);
+    if (quantityError) {
+      toast.error(quantityError);
       return;
     }
-    // Add your API submission logic here
-    console.log({
-      donationId: donation.id,
-      quantity,
-      comment,
-    });
-    onClose(); // Close the modal after successful submission
+
+    setIsLoading(true);
+    const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}api/requests/`;
+    const payload = {
+      donation: donation.id,
+      requested_quantity: quantity,
+      comments: comment,
+    };
+
+    try {
+      const response = await fetch(apiUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        const responseData = await response.json();
+        toast.error(responseData.detail || "Failed to submit request.");
+        throw new Error(responseData.detail || "Failed to submit request.");
+      }
+
+      toast.success("Request submitted successfully!");
+      setTimeout(onClose, 3000);
+    } catch (error) {
+      toast.error(error.message || "An error occurred.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
       <div className="bg-white rounded-lg shadow-xl w-11/12 max-w-lg p-6 relative">
-        {/* Close Button */}
         <button
           onClick={onClose}
           className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
@@ -44,58 +70,39 @@ const DonationRequestModal = ({ donation, onClose }) => {
         >
           ✕
         </button>
-
-        {/* Modal Header */}
-        <h2 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-yellow-500 mb-4">
-          Request {donation.title}
+        <h2 className="text-2xl font-bold text-pink-500 text-center mb-4">
+          Request {donation.item_name}
         </h2>
-
-        {/* Donation Details */}
         <div className="text-sm text-gray-700 space-y-2 mb-6">
           <p>
-            <span className="font-semibold">Available Quantity:</span>{" "}
-            {donation.quantity}
+            <span className="font-semibold">Available Quantity:</span> {donation.quantity}
           </p>
         </div>
-
-        {/* Form */}
         <div className="space-y-4">
-          {/* Quantity Input */}
           <div>
-            <label className="block text-gray-600 font-medium mb-1">
-              Quantity
-            </label>
+            <label className="block text-gray-600 font-medium mb-1">Quantity</label>
             <input
               type="number"
               min="1"
               max={donation.quantity}
               value={quantity}
               onChange={handleQuantityChange}
-              className={`w-full p-2 border rounded-md focus:outline-none text-black focus:ring-2 ${
-                error ? "border-red-500 focus:ring-red-500" : "focus:ring-pink-500"
-              }`}
+              className="w-full p-2 border rounded-md text-black focus:outline-none focus:ring-2 focus:ring-pink-500"
+              placeholder="Enter the requested quantity"
             />
           </div>
-
-          {/* Comment Input */}
           <div>
-            <label className="block text-gray-600 font-medium mb-1">
-              Optional Comment
-            </label>
+            <label className="block text-gray-600 font-medium mb-1">Optional Comment</label>
             <textarea
               maxLength={250}
               value={comment}
               onChange={(e) => setComment(e.target.value)}
-              className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 text-black focus:ring-pink-500"
-              placeholder="Add a comment (max 50 words)"
+              className="w-full p-2 border rounded-md text-black focus:outline-none focus:ring-2 focus:ring-pink-500"
+              placeholder="Add a comment (optional)"
             />
+            <p className="text-sm text-gray-500 mt-1">{comment.length} / 250 characters</p>
           </div>
         </div>
-
-        {/* Error Message */}
-        {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
-
-        {/* Action Buttons */}
         <div className="mt-6 flex justify-end space-x-4">
           <button
             onClick={onClose}
@@ -104,20 +111,31 @@ const DonationRequestModal = ({ donation, onClose }) => {
             Cancel
           </button>
           <button
-            onClick={handleRequestSubmit}
-            disabled={quantity < 1 || quantity > donation.quantity}
+            onClick={handleSubmit}
+            disabled={isLoading || quantity < 1 || quantity > donation.quantity}
             className={`py-2 px-4 font-semibold rounded-md transition-all ${
-              quantity < 1 || quantity > donation.quantity
+              isLoading
                 ? "bg-gray-300 text-gray-500 cursor-not-allowed"
                 : "bg-gradient-to-r from-pink-500 to-yellow-500 text-white hover:from-pink-600 hover:to-yellow-600"
             }`}
           >
-            Submit Request
+            {isLoading ? "Submitting..." : "Submit Request"}
           </button>
         </div>
       </div>
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        style={{ zIndex: 9999 }}
+      />
     </div>
   );
 };
 
-export default DonationRequestModal;
+export default RequestModal;
