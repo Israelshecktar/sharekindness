@@ -209,6 +209,32 @@ class RequestDetailView(BaseDetailView):
     model = Request
     serializer_class = RequestSerializer
 
+class UserDonationsView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        """
+        Retrieve donations made by the logged-in user, including associated requests.
+        """
+        user = request.user
+
+        # Ensure only donors can view their donations
+        if user.role != 'DONOR':
+            return handle_error("You are not authorized to view this page.", status.HTTP_403_FORBIDDEN)
+
+        # Fetch the donations and prefetch related requests for optimization
+        donations = Donation.objects.filter(donor=user).prefetch_related('requests')
+        data = [
+            {
+                "donation": DonationSerializer(donation).data,
+                "requests": RequestSerializer(donation.requests.all(), many=True).data
+            }
+            for donation in donations
+        ]
+
+        return Response(data, status=status.HTTP_200_OK)
+
+
 
 # 8⃣ Log View
 class LogView(APIView):

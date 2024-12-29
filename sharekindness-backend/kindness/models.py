@@ -8,16 +8,23 @@ class User(AbstractUser):
         ('DONOR', 'Donor'),
         ('RECIPIENT', 'Recipient'),
     ]
-    email = models.EmailField(unique=True)  # Ensure email is unique
-    role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='RECIPIENT')
+    email = models.EmailField(unique=True)
+    roles = models.ManyToManyField('Role', related_name='users')  # Many-to-Many relationship
     profile_picture = models.ImageField(upload_to='profile_pics/', blank=True, null=True)
     contact_info = models.TextField(blank=True, null=True)
 
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['username']  # Keep 'username' for Django compatibility
+    REQUIRED_FIELDS = ['username']  # Keep 'username' for compatibility
 
     def __str__(self):
-        return f"{self.email} ({self.get_role_display()})"
+        return f"{self.email} (Roles: {', '.join(role.name for role in self.roles.all())})"
+
+
+class Role(models.Model):
+    name = models.CharField(max_length=20, choices=User.ROLE_CHOICES, unique=True)
+
+    def __str__(self):
+        return self.name
 
 
 # 2⃣ Donation model

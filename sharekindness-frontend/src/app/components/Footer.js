@@ -1,11 +1,10 @@
 import { useState } from "react";
-import { HomeIcon, GiftIcon, UserIcon } from "@heroicons/react/24/outline";
+import { HomeIcon, Squares2X2Icon, UserIcon } from "@heroicons/react/24/outline";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 const Footer = () => {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState("My Donations");
 
   // Logout Function (reused from Header)
   const handleLogout = async () => {
@@ -38,13 +37,19 @@ const Footer = () => {
     <footer className="bg-gray-800 text-white text-center p-4 fixed bottom-0 w-full sm:relative">
       {/* Navigation Links (Visible on smaller screens) */}
       <nav className="flex justify-around sm:hidden">
-        <a href="#" className="flex flex-col items-center text-sm hover:text-gray-400 transition">
+        <a
+          href="/dashboard"
+          className="flex flex-col items-center text-sm hover:text-gray-400 transition"
+        >
           <HomeIcon className="w-6 h-6 mb-1" />
           <span>Home</span>
         </a>
-        <a href="#" className="flex flex-col items-center text-sm hover:text-gray-400 transition">
-          <GiftIcon className="w-6 h-6 mb-1" />
-          <span>Donations</span>
+        <a
+          href="/donations"
+          className="flex flex-col items-center text-sm hover:text-gray-400 transition"
+        >
+          <Squares2X2Icon className="w-6 h-6 mb-1" />
+          <span>Dashboard</span>
         </a>
         {/* Profile Button */}
         <button
@@ -65,20 +70,12 @@ const Footer = () => {
 
             {/* Modal Navigation Links */}
             <nav className="space-y-4">
-              {["My Donations", "Pendings", "Received", "Settings"].map((tab) => (
-                <button
-                  key={tab}
-                  onClick={() => setActiveTab(tab)}
-                  className={`block text-left w-full px-4 py-2 rounded-lg ${
-                    activeTab === tab
-                      ? "bg-gray-200 text-gray-900 font-semibold"
-                      : "text-gray-700 hover:text-gray-900 hover:bg-gray-100"
-                  }`}
-                >
-                  {tab}
-                </button>
-              ))}
-              {/* Sign Out */}
+              <a
+                href="/settings"
+                className="block text-left w-full px-4 py-2 rounded-lg text-gray-700 hover:text-gray-900 hover:bg-gray-100"
+              >
+                Settings
+              </a>
               <button
                 onClick={handleLogout}
                 className="block text-left w-full px-4 py-2 rounded-lg text-red-500 hover:bg-gray-100"

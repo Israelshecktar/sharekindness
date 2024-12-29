@@ -4,9 +4,20 @@ from .models import User, Donation, Request
 
 # User Serializer 
 class UserSerializer(serializers.ModelSerializer):
+    roles = serializers.SerializerMethodField()  # Dynamic field for roles
+
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'role', 'profile_picture', 'contact_info']
+        fields = ['id', 'username', 'email', 'roles', 'profile_picture', 'contact_info']
+
+    def get_roles(self, obj):
+        # Return user roles dynamically based on their donations and requests
+        roles = []
+        if obj.donations.exists():
+            roles.append("DONOR")
+        if obj.requests.exists():
+            roles.append("RECIPIENT")
+        return roles
 
 # Register Serializer 
 class RegisterSerializer(serializers.ModelSerializer):
@@ -14,7 +25,7 @@ class RegisterSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['username', 'email', 'password', 'role', 'profile_picture', 'contact_info']
+        fields = ['username', 'email', 'password', 'profile_picture', 'contact_info']
 
     def create(self, validated_data):
         password = validated_data.pop('password')
@@ -22,6 +33,7 @@ class RegisterSerializer(serializers.ModelSerializer):
         user.set_password(password)
         user.save()
         return user
+
 
 # Donation Serializer
 class DonationSerializer(serializers.ModelSerializer):

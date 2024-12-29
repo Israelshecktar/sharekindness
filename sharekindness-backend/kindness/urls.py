@@ -21,6 +21,7 @@ from kindness.views import (
     RequestListCreateView,
     RequestDetailView,
     LogView,
+    UserDonationsView,  # Import the new view
 )
 
 urlpatterns = [
@@ -33,6 +34,7 @@ urlpatterns = [
     path('api/requests/', RequestListCreateView.as_view(), name='request-list-create'),
     path('api/requests/<int:pk>/', RequestDetailView.as_view(), name='request-detail'),
     path('api/log/', LogView.as_view(), name='log'),
+    path('api/user-donations/', UserDonationsView.as_view(), name='user-donations'),  # Add the new endpoint
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
 ]
