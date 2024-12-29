@@ -34,6 +34,7 @@ class Donation(models.Model):
         ('RESERVED', 'Reserved'),  # A request has been approved but not yet claimed.
         ('CLAIMED', 'Claimed'),  # Donation has been picked up or delivered.
         ('EXPIRED', 'Expired'),  # Donation is no longer available.
+        ('CLOSED', 'Closed'),  # Donation is closed by the donor.
     ]
     donor = models.ForeignKey(User, on_delete=models.CASCADE, related_name='donations')
     item_name = models.CharField(max_length=100)

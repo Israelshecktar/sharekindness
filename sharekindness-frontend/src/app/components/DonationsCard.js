@@ -1,7 +1,7 @@
 import { useState } from "react";
-import DonationRequestModal from "./DonationRequestModal";
+import DonationRequestModal from "./DonationRequestModal"; // Import the correct modal
 
-const DonationCard = ({ id, item_name, category, quantity, image, status }) => {
+const DonationCard = ({ id, item_name, category, quantity, image, status, requestsCount }) => {
   const [isRequestModalOpen, setIsRequestModalOpen] = useState(false);
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
 
@@ -21,6 +21,7 @@ const DonationCard = ({ id, item_name, category, quantity, image, status }) => {
 
   return (
     <div className="p-6 bg-white shadow-lg rounded-lg border border-gray-200 hover:shadow-xl transition-all transform hover:-translate-y-2">
+      {/* Donation Image */}
       {imageUrl ? (
         <img
           src={imageUrl}
@@ -35,10 +36,12 @@ const DonationCard = ({ id, item_name, category, quantity, image, status }) => {
         </div>
       )}
 
+      {/* Title */}
       <h4 className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-yellow-500 mb-2">
         {formatText(item_name)}
       </h4>
 
+      {/* Details */}
       <div className="text-gray-700 text-sm space-y-1 mb-4">
         <p>
           <span className="font-semibold text-gray-900">Category:</span>{" "}
@@ -49,10 +52,18 @@ const DonationCard = ({ id, item_name, category, quantity, image, status }) => {
           {quantity}
         </p>
         <p>
+          <span className="font-semibold text-gray-900">Requests:</span>{" "}
+          {requestsCount} / 5
+        </p>
+        <p>
           <span className="font-semibold text-gray-900">Status:</span>{" "}
           <span
             className={`${
-              status === "AVAILABLE" ? "text-green-500" : "text-red-500"
+              status === "AVAILABLE"
+                ? "text-green-500"
+                : status === "CLOSED"
+                ? "text-red-500"
+                : "text-gray-500"
             }`}
           >
             {formatText(status)}
@@ -60,27 +71,33 @@ const DonationCard = ({ id, item_name, category, quantity, image, status }) => {
         </p>
       </div>
 
+      {/* Action Button */}
       <button
         onClick={handleOpenRequestModal}
-        className="w-full py-3 text-white font-semibold rounded-md bg-gradient-to-r from-pink-500 to-yellow-500 hover:from-pink-600 hover:to-yellow-600 transition-all"
+        disabled={status === "CLOSED" || requestsCount >= 5}
+        className={`w-full py-3 font-semibold rounded-md transition-all ${
+          status === "CLOSED" || requestsCount >= 5
+            ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+            : "bg-gradient-to-r from-pink-500 to-yellow-500 text-white hover:from-pink-600 hover:to-yellow-600"
+        }`}
         aria-label={`Request ${item_name || "donation"}`}
       >
-        Request
+        {status === "CLOSED" || requestsCount >= 5 ? "Request Closed" : "Request"}
       </button>
 
+      {/* Request Modal */}
       {isRequestModalOpen && (
         <DonationRequestModal
           donation={{
             id,
             item_name,
             quantity,
-            category,
-            status,
           }}
           onClose={handleCloseRequestModal}
         />
       )}
 
+      {/* Image Modal */}
       {isImageModalOpen && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-70 z-50">
           <div className="relative">
@@ -91,7 +108,6 @@ const DonationCard = ({ id, item_name, category, quantity, image, status }) => {
             >
               ✕
             </button>
-
             <img
               src={imageUrl}
               alt={item_name || "Donation full-size image"}

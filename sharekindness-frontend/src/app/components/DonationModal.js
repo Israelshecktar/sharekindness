@@ -13,26 +13,58 @@ const DonationModal = ({ onClose }) => {
   const [imagePreviews, setImagePreviews] = useState([]);
   const [loading, setLoading] = useState(false);
 
+  // Handle input changes
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  // Handle image upload
   const handleImageUpload = (e) => {
     const files = Array.from(e.target.files);
 
-    if (files.length > 2) {
-      toast.error("You can only upload a maximum of 2 pictures.");
+    // Validate file type
+    const validImages = files.filter((file) =>
+      ["image/jpeg", "image/png", "image/gif"].includes(file.type)
+    );
+    if (validImages.length < files.length) {
+      toast.error("Only JPEG, PNG, and GIF files are allowed.");
+    }
+
+    // Limit to 2 images
+    if (validImages.length > 2) {
+      toast.error("You can only upload a maximum of 2 images.");
       return;
     }
 
-    setFormData((prev) => ({ ...prev, image: files }));
-    setImagePreviews(files.map((file) => URL.createObjectURL(file)));
+    setFormData((prev) => ({ ...prev, image: validImages }));
+    setImagePreviews(validImages.map((file) => URL.createObjectURL(file)));
   };
 
+  // Handle image removal
+  const handleRemoveImage = (index) => {
+    const updatedImages = formData.image.filter((_, i) => i !== index);
+    setFormData((prev) => ({ ...prev, image: updatedImages }));
+    setImagePreviews(updatedImages.map((file) => URL.createObjectURL(file)));
+  };
+
+  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // Validate form data
+    if (!formData.category) {
+      toast.error("Please select a category.");
+      return;
+    }
+    if (!formData.itemName.trim()) {
+      toast.error("Item name cannot be empty.");
+      return;
+    }
+    if (formData.quantity < 1) {
+      toast.error("Quantity must be at least 1.");
+      return;
+    }
     if (formData.image.length === 0) {
       toast.error("Please upload at least one image.");
       return;
@@ -69,6 +101,7 @@ const DonationModal = ({ onClose }) => {
       toast.success("Donation created successfully!");
       setTimeout(onClose, 3000);
     } catch (error) {
+      console.error("Error submitting donation:", error);
       toast.error(error.message || "An error occurred.");
     } finally {
       setLoading(false);
@@ -78,6 +111,7 @@ const DonationModal = ({ onClose }) => {
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black/70 z-50">
       <div className="bg-white rounded-lg p-6 w-11/12 max-w-lg relative">
+        {/* Close Button */}
         <button
           onClick={onClose}
           className="absolute top-4 right-4 text-gray-700 hover:text-red-500"
@@ -85,8 +119,12 @@ const DonationModal = ({ onClose }) => {
         >
           ✕
         </button>
+
         <h2 className="text-2xl font-bold mb-4 text-pink-500 text-center">Make a Donation</h2>
+
+        {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Category */}
           <div>
             <label className="block text-gray-700 mb-2">Category</label>
             <select
@@ -104,6 +142,8 @@ const DonationModal = ({ onClose }) => {
               <option value="OTHER">Other</option>
             </select>
           </div>
+
+          {/* Item Name */}
           <div>
             <label className="block text-gray-700 mb-2">Item Name</label>
             <input
@@ -116,6 +156,8 @@ const DonationModal = ({ onClose }) => {
               required
             />
           </div>
+
+          {/* Quantity */}
           <div>
             <label className="block text-gray-700 mb-2">Quantity</label>
             <input
@@ -128,6 +170,8 @@ const DonationModal = ({ onClose }) => {
               required
             />
           </div>
+
+          {/* Description */}
           <div>
             <label className="block text-gray-700 mb-2">Description</label>
             <textarea
@@ -140,6 +184,8 @@ const DonationModal = ({ onClose }) => {
               required
             ></textarea>
           </div>
+
+          {/* Images */}
           <div>
             <label className="block text-gray-700 mb-2">Attach Pictures (Max 2)</label>
             <input
@@ -153,15 +199,25 @@ const DonationModal = ({ onClose }) => {
             <p className="text-sm text-gray-500 mt-1">Upload up to 2 images.</p>
             <div className="mt-4 flex space-x-4">
               {imagePreviews.map((src, index) => (
-                <img
-                  key={index}
-                  src={src}
-                  alt={`Preview ${index + 1}`}
-                  className="w-20 h-20 object-cover rounded-md border"
-                />
+                <div key={index} className="relative">
+                  <img
+                    src={src}
+                    alt={`Preview ${index + 1}`}
+                    className="w-20 h-20 object-cover rounded-md border"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveImage(index)}
+                    className="absolute top-0 right-0 bg-red-500 text-white rounded-full p-1 hover:bg-red-700"
+                  >
+                    ✕
+                  </button>
+                </div>
               ))}
             </div>
           </div>
+
+          {/* Submit Button */}
           <div className="text-center">
             <button
               type="submit"
@@ -173,6 +229,8 @@ const DonationModal = ({ onClose }) => {
           </div>
         </form>
       </div>
+
+      {/* Toast Notifications */}
       <ToastContainer
         position="top-right"
         autoClose={3000}
