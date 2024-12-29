@@ -3,6 +3,8 @@
 import { useState, useEffect } from "react";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import Header from "../components/Header"; // Importing Header
+import Footer from "../components/Footer"; // Importing Footer
 
 const UserDashboard = () => {
   const [data, setData] = useState({ donations: [], requests: [] });
@@ -36,38 +38,47 @@ const UserDashboard = () => {
   }, []);
 
   return (
-    <div className="p-6 bg-gray-100 min-h-screen">
-      <h1 className="text-2xl font-bold text-center mb-6">My Dashboard</h1>
+    <>
+      {/* Header */}
+      <Header />
 
-      {/* Tabs */}
-      <div className="flex justify-center space-x-4 mb-6">
-        <button
-          className={`py-2 px-4 rounded-md transition-all ${
-            activeTab === "donations" ? "bg-pink-500 text-white" : "bg-gray-200 text-black"
-          }`}
-          onClick={() => setActiveTab("donations")}
-        >
-          My Donations
-        </button>
-        <button
-          className={`py-2 px-4 rounded-md transition-all ${
-            activeTab === "requests" ? "bg-pink-500 text-white" : "bg-gray-200 text-black"
-          }`}
-          onClick={() => setActiveTab("requests")}
-        >
-          My Requests
-        </button>
+      {/* Main Content */}
+      <div className="p-6 bg-gray-100 min-h-screen">
+        <h1 className="text-2xl font-bold text-center mb-6">My Dashboard</h1>
+
+        {/* Tabs */}
+        <div className="flex justify-center space-x-4 mb-6">
+          <button
+            className={`py-2 px-4 rounded-md transition-all ${
+              activeTab === "donations" ? "bg-pink-500 text-white" : "bg-gray-200 text-black"
+            }`}
+            onClick={() => setActiveTab("donations")}
+          >
+            My Donations
+          </button>
+          <button
+            className={`py-2 px-4 rounded-md transition-all ${
+              activeTab === "requests" ? "bg-pink-500 text-white" : "bg-gray-200 text-black"
+            }`}
+            onClick={() => setActiveTab("requests")}
+          >
+            My Requests
+          </button>
+        </div>
+
+        {/* Content */}
+        {loading ? (
+          <p className="text-center text-gray-500">Loading...</p>
+        ) : activeTab === "donations" ? (
+          <DonationsList donations={data.donations} />
+        ) : (
+          <RequestsList requests={data.requests} />
+        )}
       </div>
 
-      {/* Content */}
-      {loading ? (
-        <p className="text-center text-gray-500">Loading...</p>
-      ) : activeTab === "donations" ? (
-        <DonationsList donations={data.donations} />
-      ) : (
-        <RequestsList requests={data.requests} />
-      )}
-    </div>
+      {/* Footer */}
+      <Footer />
+    </>
   );
 };
 

@@ -5,6 +5,7 @@ import "react-toastify/dist/ReactToastify.css";
 
 const Header = () => {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState("home"); // State for active tab
 
   // Logout Function
   const handleLogout = async () => {
@@ -47,29 +48,52 @@ const Header = () => {
           {/* Home */}
           <a
             href="/dashboard"
-            className="flex items-center text-lg sm:text-xl hover:text-pink-300 transition"
+            onClick={() => setActiveTab("home")} // Set active tab
+            className={`flex items-center text-lg sm:text-xl transition ${
+              activeTab === "home" ? "text-yellow-300" : "hover:text-pink-300"
+            }`}
           >
-            <HomeIcon className="w-6 h-6 mr-2" />
+            <HomeIcon
+              className={`w-6 h-6 mr-2 ${
+                activeTab === "home" ? "text-yellow-300" : ""
+              }`}
+            />
             <span>Home</span>
           </a>
 
           {/* Dashboard */}
           <a
             href="/donations"
-            className="flex items-center text-lg sm:text-xl hover:text-pink-300 transition"
+            onClick={() => setActiveTab("dashboard")} // Set active tab
+            className={`flex items-center text-lg sm:text-xl transition ${
+              activeTab === "dashboard" ? "text-yellow-300" : "hover:text-pink-300"
+            }`}
           >
-            <Squares2X2Icon className="w-6 h-6 mr-2" />
+            <Squares2X2Icon
+              className={`w-6 h-6 mr-2 ${
+                activeTab === "dashboard" ? "text-yellow-300" : ""
+              }`}
+            />
             <span>Dashboard</span>
           </a>
 
           {/* Profile Dropdown */}
           <div className="relative">
             <button
-              onClick={() => setIsProfileOpen((prev) => !prev)}
-              className="flex items-center text-lg sm:text-xl hover:text-pink-300 transition"
+              onClick={() => {
+                setIsProfileOpen((prev) => !prev);
+                setActiveTab("profile");
+              }} // Set active tab
+              className={`flex items-center text-lg sm:text-xl transition ${
+                activeTab === "profile" ? "text-yellow-300" : "hover:text-pink-300"
+              }`}
             >
-              <UserIcon className="w-6 h-6 mr-2" />
-              <span>Profile</span>
+              <UserIcon
+                className={`w-6 h-6 mr-2 ${
+                  activeTab === "profile" ? "text-yellow-300" : ""
+                }`}
+              />
+              <span>Account</span>
             </button>
             {isProfileOpen && (
               <div className="absolute right-0 mt-2 w-48 bg-white text-black shadow-lg rounded-md p-2 z-10">
