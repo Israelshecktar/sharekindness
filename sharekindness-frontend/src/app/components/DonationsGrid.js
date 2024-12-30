@@ -111,6 +111,7 @@ const DonationsGrid = () => {
               quantity={donation.quantity}
               image={donation.image}
               status={donation.status}
+              donorName={donation.donor_name} // Pass donor name to the card
             />
           ))
         ) : (

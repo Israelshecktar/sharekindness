@@ -1,7 +1,16 @@
 import { useState } from "react";
-import DonationRequestModal from "./DonationRequestModal"; // Import the correct modal
+import DonationRequestModal from "./DonationRequestModal";
 
-const DonationCard = ({ id, item_name, category, quantity, image, status, requestsCount }) => {
+const DonationCard = ({ 
+  id, 
+  item_name, 
+  category, 
+  quantity, 
+  image, 
+  status, 
+  requestsCount, 
+  donorName = "Anonymous" 
+}) => {
   const [isRequestModalOpen, setIsRequestModalOpen] = useState(false);
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
 
@@ -14,21 +23,22 @@ const DonationCard = ({ id, item_name, category, quantity, image, status, reques
     ? `${process.env.NEXT_PUBLIC_API_URL}/${image.replace(/^\//, "")}`
     : null;
 
-  const handleOpenRequestModal = () => setIsRequestModalOpen(true);
-  const handleCloseRequestModal = () => setIsRequestModalOpen(false);
-  const handleOpenImageModal = () => setIsImageModalOpen(true);
-  const handleCloseImageModal = () => setIsImageModalOpen(false);
-
   return (
     <div className="p-6 bg-white shadow-lg rounded-lg border border-gray-200 hover:shadow-xl transition-all transform hover:-translate-y-2">
+      {/* Donor Name */}
+      <p className="text-sm text-gray-600 mb-2 text-center">
+        <span className="font-semibold text-gray-900">Donor: </span>
+        <span className="font-semibold text-pink-600">{donorName}</span>
+      </p>
+
       {/* Donation Image */}
       {imageUrl ? (
         <img
           src={imageUrl}
-          alt={item_name || "Donation image"}
+          alt={`Image of ${item_name}`}
           className="w-full h-48 object-cover rounded-md mb-4 cursor-pointer"
           loading="lazy"
-          onClick={handleOpenImageModal}
+          onClick={() => setIsImageModalOpen(true)}
         />
       ) : (
         <div className="w-full h-48 bg-gradient-to-r from-gray-300 to-gray-400 flex items-center justify-center rounded-md mb-4">
@@ -73,14 +83,14 @@ const DonationCard = ({ id, item_name, category, quantity, image, status, reques
 
       {/* Action Button */}
       <button
-        onClick={handleOpenRequestModal}
+        onClick={() => setIsRequestModalOpen(true)}
         disabled={status === "CLOSED" || requestsCount >= 5}
         className={`w-full py-3 font-semibold rounded-md transition-all ${
           status === "CLOSED" || requestsCount >= 5
             ? "bg-gray-300 text-gray-500 cursor-not-allowed"
             : "bg-gradient-to-r from-pink-500 to-yellow-500 text-white hover:from-pink-600 hover:to-yellow-600"
         }`}
-        aria-label={`Request ${item_name || "donation"}`}
+        aria-label={`Request ${item_name}`}
       >
         {status === "CLOSED" || requestsCount >= 5 ? "Request Closed" : "Request"}
       </button>
@@ -88,12 +98,8 @@ const DonationCard = ({ id, item_name, category, quantity, image, status, reques
       {/* Request Modal */}
       {isRequestModalOpen && (
         <DonationRequestModal
-          donation={{
-            id,
-            item_name,
-            quantity,
-          }}
-          onClose={handleCloseRequestModal}
+          donation={{ id, item_name, quantity }}
+          onClose={() => setIsRequestModalOpen(false)}
         />
       )}
 
@@ -102,7 +108,7 @@ const DonationCard = ({ id, item_name, category, quantity, image, status, reques
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-70 z-50">
           <div className="relative">
             <button
-              onClick={handleCloseImageModal}
+              onClick={() => setIsImageModalOpen(false)}
               className="absolute top-4 right-4 text-white bg-gray-800 rounded-full p-2 hover:bg-gray-600"
               aria-label="Close Image Modal"
             >
@@ -110,7 +116,7 @@ const DonationCard = ({ id, item_name, category, quantity, image, status, reques
             </button>
             <img
               src={imageUrl}
-              alt={item_name || "Donation full-size image"}
+              alt={`Full-size image of ${item_name}`}
               className="max-w-full max-h-screen rounded-lg shadow-lg"
             />
           </div>
