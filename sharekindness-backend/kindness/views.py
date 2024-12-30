@@ -209,31 +209,84 @@ class RequestDetailView(BaseDetailView):
     model = Request
     serializer_class = RequestSerializer
 
-class UserDonationsView(APIView):
+class UserDashboardView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
         """
-        Retrieve donations made by the logged-in user, including associated requests.
+        Retrieve donations and requests associated with the logged-in user.
         """
         user = request.user
 
-        # Ensure only donors can view their donations
-        if user.role != 'DONOR':
-            return handle_error("You are not authorized to view this page.", status.HTTP_403_FORBIDDEN)
+        # Fetch the donations made by the user
+        user_donations = Donation.objects.filter(donor=user).prefetch_related('requests__user')
 
-        # Fetch the donations and prefetch related requests for optimization
-        donations = Donation.objects.filter(donor=user).prefetch_related('requests')
-        data = [
-            {
-                "donation": DonationSerializer(donation).data,
-                "requests": RequestSerializer(donation.requests.all(), many=True).data
-            }
-            for donation in donations
-        ]
+        # Fetch the requests made by the user
+        user_requests = Request.objects.filter(user=user).select_related('donation', 'donation__donor')
+
+        data = {
+            "donations": [
+                {
+                    "donation": DonationSerializer(donation).data,
+                    "requests": RequestSerializer(donation.requests.all(), many=True).data
+                }
+                for donation in user_donations
+            ],
+            "requests": RequestSerializer(user_requests, many=True).data
+        }
 
         return Response(data, status=status.HTTP_200_OK)
 
+    def post(self, request):
+        """
+        Handle actions like approving/rejecting requests for the user's donations.
+        """
+        action = request.data.get("action")
+        request_id = request.data.get("request_id")
+
+        if action not in ["approve", "reject"]:
+            return handle_error("Invalid action specified.", status.HTTP_400_BAD_REQUEST)
+
+        try:
+            donation_request = Request.objects.get(id=request_id, donation__donor=request.user)
+        except Request.DoesNotExist:
+            return handle_error("Request not found or not authorized.", status.HTTP_404_NOT_FOUND)
+
+        if action == "approve":
+            donation_request.status = "APPROVED"
+        elif action == "reject":
+            donation_request.status = "REJECTED"
+
+        donation_request.save()
+        return Response({"message": f"Request {action}ed successfully."}, status=status.HTTP_200_OK)
+
+class UserNotificationView(APIView):
+    """
+    API View to fetch the notification counts for the authenticated user.
+    """
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+
+        # Count pending requests on the user's donations
+        user_donations = Donation.objects.filter(donor=user)
+        pending_requests_count = Request.objects.filter(
+            donation__in=user_donations, status="PENDING"
+        ).count()
+
+        # Count pending requests made by the user
+        pending_donations_count = Request.objects.filter(
+            user=user, status="PENDING"
+        ).count()
+
+        return Response(
+            {
+                "pending_requests": pending_requests_count,
+                "pending_donations": pending_donations_count,
+            },
+            status=200,
+        )
 
 
 # 8⃣ Log View

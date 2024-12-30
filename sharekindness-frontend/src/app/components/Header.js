@@ -1,11 +1,37 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { HomeIcon, Squares2X2Icon, UserIcon } from "@heroicons/react/24/outline";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 const Header = () => {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState("home"); // State for active tab
+  const [activeTab, setActiveTab] = useState("home");
+  const [notificationCount, setNotificationCount] = useState(0);
+
+  // Fetch notifications
+  useEffect(() => {
+    const fetchNotifications = async () => {
+      try {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}api/user-notifications/`, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch notifications.");
+        }
+
+        const data = await response.json();
+        setNotificationCount(data.pending_requests + data.pending_donations);
+      } catch (error) {
+        console.error(error.message);
+        toast.error("Unable to fetch notifications.");
+      }
+    };
+
+    fetchNotifications();
+  }, []);
 
   // Logout Function
   const handleLogout = async () => {
@@ -48,7 +74,7 @@ const Header = () => {
           {/* Home */}
           <a
             href="/dashboard"
-            onClick={() => setActiveTab("home")} // Set active tab
+            onClick={() => setActiveTab("home")}
             className={`flex items-center text-lg sm:text-xl transition ${
               activeTab === "home" ? "text-yellow-300" : "hover:text-pink-300"
             }`}
@@ -64,8 +90,8 @@ const Header = () => {
           {/* Dashboard */}
           <a
             href="/donations"
-            onClick={() => setActiveTab("dashboard")} // Set active tab
-            className={`flex items-center text-lg sm:text-xl transition ${
+            onClick={() => setActiveTab("dashboard")}
+            className={`flex items-center relative text-lg sm:text-xl transition ${
               activeTab === "dashboard" ? "text-yellow-300" : "hover:text-pink-300"
             }`}
           >
@@ -75,6 +101,11 @@ const Header = () => {
               }`}
             />
             <span>Dashboard</span>
+            {notificationCount > 0 && (
+              <span className="absolute top-0 right-0 mt-[-8px] ml-6 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                {notificationCount}
+              </span>
+            )}
           </a>
 
           {/* Profile Dropdown */}
@@ -83,7 +114,7 @@ const Header = () => {
               onClick={() => {
                 setIsProfileOpen((prev) => !prev);
                 setActiveTab("profile");
-              }} // Set active tab
+              }}
               className={`flex items-center text-lg sm:text-xl transition ${
                 activeTab === "profile" ? "text-yellow-300" : "hover:text-pink-300"
               }`}
