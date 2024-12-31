@@ -230,12 +230,29 @@ class UserDashboardView(APIView):
         data = {
             "donations": [
                 {
-                    "donation": DonationSerializer(donation).data,
-                    "requests": RequestSerializer(donation.requests.all(), many=True).data
+                    "donation": DonationSerializer(donation, context={"request": request}).data,
+                    "requests": [
+                        {
+                            "id": req.id,
+                            "user": UserSerializer(req.user, context={"request": request}).data,
+                            "requested_quantity": req.requested_quantity,
+                            "comments": req.comments,
+                        }
+                        for req in donation.requests.all()
+                    ],
                 }
                 for donation in user_donations
             ],
-            "requests": RequestSerializer(user_requests, many=True).data
+            "requests": [
+                {
+                    "id": req.id,
+                    "donation": DonationSerializer(req.donation, context={"request": request}).data,
+                    "status": req.status,
+                    "requested_quantity": req.requested_quantity,
+                    "comments": req.comments,
+                }
+                for req in user_requests
+            ],
         }
 
         return Response(data, status=status.HTTP_200_OK)
@@ -262,6 +279,7 @@ class UserDashboardView(APIView):
 
         donation_request.save()
         return Response({"message": f"Request {action}ed successfully."}, status=status.HTTP_200_OK)
+
 
 class UserNotificationView(APIView):
     """

@@ -1,33 +1,19 @@
 from rest_framework import serializers
 from .models import User, Donation, Request
 
-# User Serializer 
+
 class UserSerializer(serializers.ModelSerializer):
-    roles = serializers.SerializerMethodField()  # Dynamic field for roles
+    profile_picture = serializers.SerializerMethodField()  # Dynamically include the full URL for the profile picture
 
     class Meta:
         model = User
-        fields = [
-            'id', 
-            'username', 
-            'email', 
-            'roles', 
-            'profile_picture', 
-            'phone_number', 
-            'city', 
-            'state', 
-            'bio', 
-            'is_verified'
-        ]
+        fields = ['id', 'username', 'email', 'profile_picture', 'phone_number', 'city', 'state', 'bio']
 
-    def get_roles(self, obj):
-        # Return user roles dynamically based on their donations and requests
-        roles = []
-        if obj.donations.exists():
-            roles.append("DONOR")
-        if obj.requests.exists():
-            roles.append("RECIPIENT")
-        return roles
+    def get_profile_picture(self, obj):
+        request = self.context.get("request")
+        if obj.profile_picture:
+            return request.build_absolute_uri(obj.profile_picture.url) if request else obj.profile_picture.url
+        return None
 
 
 
