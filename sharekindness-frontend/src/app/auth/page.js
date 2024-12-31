@@ -1,25 +1,40 @@
-"use client"; // Ensure this is present at the top
+"use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation"; // Use next/navigation for app directory
+import { useRouter } from "next/navigation";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import BackgroundWrapper from "../components/BackgroundWrapper";
+import statesAndCities from "../utils/statesAndCities"; // Import the states and cities file
 
 const AuthPage = () => {
-  const router = useRouter(); // Initialize router
+  const router = useRouter();
   const [isRegister, setIsRegister] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
     password: "",
     username: "",
-    role: "RECIPIENT",
+    phone_number: "",
+    city: "",
+    state: "",
+    bio: "",
     profile_picture: null,
-    contact_info: "",
   });
+  const [bioError, setBioError] = useState("");
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
+
+    if (name === "bio") {
+      const wordCount = value.trim().split(/\s+/).length;
+      if (wordCount > 50) {
+        setBioError("Bio must not exceed 50 words.");
+        return;
+      } else {
+        setBioError("");
+      }
+    }
+
     setFormData({
       ...formData,
       [name]: files ? files[0] : value,
@@ -28,6 +43,11 @@ const AuthPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (bioError) {
+      toast.error("Please fix the bio error before submitting.");
+      return;
+    }
 
     const endpoint = isRegister
       ? `${process.env.NEXT_PUBLIC_API_URL}api/register/`
@@ -65,17 +85,17 @@ const AuthPage = () => {
 
   return (
     <BackgroundWrapper>
-      <div className="w-full max-w-md px-6 py-8 text-center">
+      <div className="w-full max-w-md px-6 py-8 bg-white text-center rounded-lg shadow-lg">
         <ToastContainer />
         <h1 className="mb-4 text-3xl font-extrabold text-pink-500">SHAREKINDNESS</h1>
-        <p className="mb-6 text-lg italic text-gray-300">
+        <p className="mb-6 text-lg italic text-gray-500">
           “Small acts of kindness create big ripples of change.”
         </p>
 
-        <h2 className="mb-4 text-3xl font-bold text-white">
+        <h2 className="mb-6 text-3xl font-bold text-gray-700">
           {isRegister ? "Create an Account" : "Sign In"}
         </h2>
-        <p className="mb-6 text-gray-400">
+        <p className="mb-6 text-gray-500">
           {isRegister ? "Already have an account? " : "New user? "}
           <button
             onClick={() => setIsRegister(!isRegister)}
@@ -85,79 +105,180 @@ const AuthPage = () => {
           </button>
         </p>
 
-        <form className="space-y-4" onSubmit={handleSubmit}>
-          {isRegister && (
-            <input
-              type="text"
-              name="username"
-              placeholder="Username"
-              required
-              className="w-full px-4 py-2 text-gray-900 bg-white rounded-full focus:ring-2 focus:ring-pink-500"
-              onChange={handleChange}
-            />
-          )}
-
-          <input
-            type="email"
-            name="email"
-            placeholder="Email Address"
-            required
-            className="w-full px-4 py-2 text-gray-900 bg-white rounded-full focus:ring-2 focus:ring-pink-500"
-            onChange={handleChange}
-          />
-
-          <input
-            type="password"
-            name="password"
-            placeholder="Password"
-            required
-            className="w-full px-4 py-2 text-gray-900 bg-white rounded-full focus:ring-2 focus:ring-pink-500"
-            onChange={handleChange}
-          />
-
-          {isRegister && (
+        <form className="space-y-6" onSubmit={handleSubmit}>
+          {isRegister ? (
             <>
-              <select
-                name="role"
-                required
-                className="w-full px-4 py-2 text-gray-900 bg-white rounded-full focus:ring-2 focus:ring-pink-500"
-                onChange={handleChange}
-              >
-                <option value="DONOR">Donor</option>
-                <option value="RECIPIENT">Recipient</option>
-              </select>
+              {/* Registration Form */}
+              <div>
+                <h3 className="text-left text-lg font-semibold text-gray-600 mb-2">
+                  Personal Information
+                </h3>
+                <label htmlFor="username" className="block text-left text-gray-700">
+                  Username
+                </label>
+                <input
+                  type="text"
+                  name="username"
+                  id="username"
+                  placeholder="Enter your username"
+                  required
+                  className="w-full mt-1 px-4 py-2 border rounded-lg text-black focus:ring-pink-500 focus:border-pink-500"
+                  onChange={handleChange}
+                />
+              </div>
 
-              <input
-                type="file"
-                name="profile_picture"
-                className="w-full px-4 py-2 text-gray-900 bg-white rounded-full focus:ring-2 focus:ring-pink-500"
-                onChange={handleChange}
-              />
+              <div>
+                <label htmlFor="bio" className="block text-left text-gray-700">
+                  Short Bio <span className="text-sm text-gray-500">(Max 50 words)</span>
+                </label>
+                <textarea
+                  name="bio"
+                  id="bio"
+                  placeholder="Write a short bio"
+                  rows="3"
+                  className="w-full mt-1 px-4 py-2 border rounded-lg text-black focus:ring-pink-500 focus:border-pink-500"
+                  onChange={handleChange}
+                ></textarea>
+                {bioError && <p className="text-red-500 text-sm mt-1">{bioError}</p>}
+              </div>
 
-              <textarea
-                name="contact_info"
-                placeholder="Contact Info"
-                rows="3"
-                className="w-full px-4 py-2 text-gray-900 bg-white rounded-lg focus:ring-2 focus:ring-pink-500"
-                onChange={handleChange}
-              ></textarea>
+              <div>
+                <h3 className="text-left text-lg font-semibold text-gray-600 mb-2">
+                  Contact Information
+                </h3>
+                <label htmlFor="email" className="block text-left text-gray-700">
+                  Email Address
+                </label>
+                <input
+                  type="email"
+                  name="email"
+                  id="email"
+                  placeholder="Enter your email"
+                  required
+                  className="w-full mt-1 px-4 py-2 border rounded-lg text-black focus:ring-pink-500 focus:border-pink-500"
+                  onChange={handleChange}
+                />
+
+                <label htmlFor="phone_number" className="block text-left text-gray-700 mt-4">
+                  Phone Number
+                </label>
+                <input
+                  type="text"
+                  name="phone_number"
+                  id="phone_number"
+                  placeholder="Enter your phone number"
+                  required
+                  className="w-full mt-1 px-4 py-2 border rounded-lg text-black focus:ring-pink-500 focus:border-pink-500"
+                  onChange={handleChange}
+                />
+              </div>
+
+              <div>
+                <h3 className="text-left text-lg font-semibold text-gray-600 mb-2">
+                  Location
+                </h3>
+                <label htmlFor="state" className="block text-left text-gray-700">
+                  State
+                </label>
+                <select
+                  name="state"
+                  id="state"
+                  required
+                  className="w-full mt-1 px-4 py-2 border rounded-lg text-black focus:ring-pink-500 focus:border-pink-500"
+                  onChange={(e) =>
+                    setFormData({ ...formData, state: e.target.value, city: "" })
+                  }
+                >
+                  <option value="" disabled>
+                    Select your state
+                  </option>
+                  {Object.keys(statesAndCities).map((state) => (
+                    <option key={state} value={state}>
+                      {state}
+                    </option>
+                  ))}
+                </select>
+
+                <label htmlFor="city" className="block text-left text-gray-700 mt-4">
+                  City
+                </label>
+                <select
+                  name="city"
+                  id="city"
+                  required
+                  disabled={!formData.state}
+                  className="w-full mt-1 px-4 py-2 border rounded-lg text-black focus:ring-pink-500 focus:border-pink-500"
+                  onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+                >
+                  <option value="" disabled>
+                    Select your city
+                  </option>
+                  {statesAndCities[formData.state]?.map((city) => (
+                    <option key={city} value={city}>
+                      {city}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <h3 className="text-left text-lg font-semibold text-gray-600 mb-2">
+                  Profile Picture
+                </h3>
+                <label htmlFor="profile_picture" className="block text-left text-gray-700">
+                  Upload a profile picture
+                </label>
+                <input
+                  type="file"
+                  name="profile_picture"
+                  id="profile_picture"
+                  className="w-full mt-1 px-4 py-2 border rounded-lg text-black focus:ring-pink-500 focus:border-pink-500"
+                  onChange={handleChange}
+                />
+              </div>
+            </>
+          ) : (
+            <>
+              {/* Sign-In Form */}
+              <div>
+                <label htmlFor="email" className="block text-left text-gray-700">
+                  Email Address
+                </label>
+                <input
+                  type="email"
+                  name="email"
+                  id="email"
+                  placeholder="Enter your email"
+                  required
+                  className="w-full mt-1 px-4 py-2 border rounded-lg text-black focus:ring-pink-500 focus:border-pink-500"
+                  onChange={handleChange}
+                />
+              </div>
+
+              <div>
+                <label htmlFor="password" className="block text-left text-gray-700">
+                  Password
+                </label>
+                <input
+                  type="password"
+                  name="password"
+                  id="password"
+                  placeholder="Enter your password"
+                  required
+                  className="w-full mt-1 px-4 py-2 border rounded-lg text-black focus:ring-pink-500 focus:border-pink-500"
+                  onChange={handleChange}
+                />
+              </div>
             </>
           )}
 
           <button
             type="submit"
-            className="w-full px-4 py-2 font-bold text-white bg-pink-500 rounded-full hover:bg-pink-600"
+            className="w-full px-4 py-2 text-white font-bold bg-pink-500 rounded-lg hover:bg-pink-600 focus:ring-2 focus:ring-pink-500 focus:ring-offset-2"
           >
             {isRegister ? "Sign Up" : "Sign In"}
           </button>
         </form>
-
-        {!isRegister && (
-          <p className="mt-4 text-gray-400">
-            Forgot Password?{" "}
-            <button className="text-pink-500 hover:underline">Click here</button>
-          </p>
-        )}
       </div>
     </BackgroundWrapper>
   );

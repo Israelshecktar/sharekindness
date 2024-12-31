@@ -7,7 +7,18 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'roles', 'profile_picture', 'contact_info']
+        fields = [
+            'id', 
+            'username', 
+            'email', 
+            'roles', 
+            'profile_picture', 
+            'phone_number', 
+            'city', 
+            'state', 
+            'bio', 
+            'is_verified'
+        ]
 
     def get_roles(self, obj):
         # Return user roles dynamically based on their donations and requests
@@ -19,18 +30,29 @@ class UserSerializer(serializers.ModelSerializer):
         return roles
 
 
+
 # Register Serializer 
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, required=True, style={'input_type': 'password'})
 
     class Meta:
         model = User
-        fields = ['username', 'email', 'password', 'profile_picture', 'contact_info']
+        fields = [
+            'username', 
+            'email', 
+            'password', 
+            'profile_picture', 
+            'phone_number', 
+            'city', 
+            'state', 
+            'bio'
+        ]
 
     def create(self, validated_data):
         password = validated_data.pop('password')
         user = User(**validated_data)
         user.set_password(password)
+        user.is_verified = False  # Ensure the user is initially unverified
         user.save()
         return user
 

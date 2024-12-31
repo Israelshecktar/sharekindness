@@ -8,10 +8,15 @@ class User(AbstractUser):
         ('DONOR', 'Donor'),
         ('RECIPIENT', 'Recipient'),
     ]
+
     email = models.EmailField(unique=True)
     roles = models.ManyToManyField('Role', related_name='users')  # Many-to-Many relationship
     profile_picture = models.ImageField(upload_to='profile_pics/', blank=True, null=True)
-    contact_info = models.TextField(blank=True, null=True)
+    phone_number = models.CharField(max_length=15, blank=True, null=True)  # Optional phone number
+    city = models.CharField(max_length=50, blank=True, null=True)  # City of residence
+    state = models.CharField(max_length=50, blank=True, null=True)  # State of residence
+    bio = models.TextField(blank=True, null=True)  # Optional bio or description
+    is_verified = models.BooleanField(default=False)  # Indicates if the user is verified
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username']  # Keep 'username' for compatibility
@@ -56,6 +61,7 @@ class Donation(models.Model):
         return f"{self.item_name} ({self.get_status_display()})"
 
 
+# 3⃣ Request model
 class Request(models.Model):
     STATUS_CHOICES = [
         ('PENDING', 'Pending'),

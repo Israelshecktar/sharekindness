@@ -64,7 +64,7 @@ const DonationsGrid = () => {
   });
 
   return (
-    <section className="p-4 bg-blue-100 min-h-screen">
+    <section className="p-4 bg-blue-100 min-h-screen pb-24">
       <ToastContainer position="top-right" autoClose={3000} />
 
       <div className="block sm:hidden mb-4">

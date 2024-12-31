@@ -24,7 +24,7 @@ def handle_error(message, status_code):
     return Response({"error": message}, status=status_code)
 
 
-# 1⃣ Register View
+# 1⃣ Updated Register View
 class RegisterView(APIView):
     permission_classes = [AllowAny]
 
@@ -32,6 +32,9 @@ class RegisterView(APIView):
         serializer = RegisterSerializer(data=request.data)
         if serializer.is_valid():
             user = serializer.save()
+            # Ensure the user is initially unverified
+            user.is_verified = False
+            user.save()
             return Response(
                 {
                     "message": "User registered successfully!",
@@ -39,7 +42,7 @@ class RegisterView(APIView):
                 },
                 status=status.HTTP_201_CREATED,
             )
-        return handle_error("Invalid registration data.", status.HTTP_400_BAD_REQUEST)
+        return handle_error(serializer.errors, status.HTTP_400_BAD_REQUEST)
 
 
 # 2⃣ Login View

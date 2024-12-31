@@ -12,6 +12,7 @@ const UserDashboard = () => {
   const [activeTab, setActiveTab] = useState("donations");
   const [selectedDonation, setSelectedDonation] = useState(null);
 
+  // Fetch dashboard data
   useEffect(() => {
     const fetchDashboardData = async () => {
       setLoading(true);
@@ -40,10 +41,12 @@ const UserDashboard = () => {
 
   const handleApproveRequest = (donationId, requestId) => {
     console.log(`Approving request ${requestId} for donation ${donationId}`);
+    // API call logic for approving the request
   };
 
   const handleRejectRequest = (donationId, requestId) => {
     console.log(`Rejecting request ${requestId} for donation ${donationId}`);
+    // API call logic for rejecting the request
   };
 
   return (
@@ -95,12 +98,13 @@ const UserDashboard = () => {
   );
 };
 
+// Donations List Component
 const DonationsList = ({ donations, onReview }) => (
   donations.length > 0 ? (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {donations.map((donation) => (
+      {donations.map((donation, index) => (
         <div
-          key={donation.id}
+          key={donation.id || `donation-${index}`}
           className="p-6 bg-white rounded-lg shadow-lg border border-gray-200 hover:shadow-xl transition-all transform hover:-translate-y-2"
         >
           <h2 className="text-lg font-semibold mb-4 text-pink-500">{donation.item_name}</h2>
@@ -127,12 +131,13 @@ const DonationsList = ({ donations, onReview }) => (
   )
 );
 
+// Requests List Component
 const RequestsList = ({ requests }) => (
   requests.length > 0 ? (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {requests.map((request) => (
+      {requests.map((request, index) => (
         <div
-          key={request.id}
+          key={request.id || `request-${index}`}
           className="p-6 bg-white rounded-lg shadow-lg border border-gray-200 hover:shadow-xl transition-all transform hover:-translate-y-2"
         >
           <h2 className="text-lg font-semibold mb-4 text-pink-500">{request.donation.item_name}</h2>
@@ -150,6 +155,7 @@ const RequestsList = ({ requests }) => (
   )
 );
 
+// Donation Request Modal Component
 const DonationRequestModal = ({ donation, onClose, onApprove, onReject }) => (
   <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
     <div className="bg-white rounded-lg p-6 w-full max-w-md shadow-lg">
@@ -158,9 +164,9 @@ const DonationRequestModal = ({ donation, onClose, onApprove, onReject }) => (
       </h2>
       {donation.requests.length > 0 ? (
         <ul className="space-y-4">
-          {donation.requests.map((request) => (
+          {donation.requests.map((request, index) => (
             <li
-              key={request.id}
+              key={request.id || `modal-request-${index}`}
               className="p-4 bg-gray-100 rounded-lg shadow-md"
             >
               <p className="text-gray-700">
