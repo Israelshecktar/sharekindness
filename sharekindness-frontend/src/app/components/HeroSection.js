@@ -41,8 +41,16 @@ const HeroSection = () => {
         backgroundImage: `url('${images[currentImageIndex]}')`,
       }}
     >
-      {/* Background Overlay with slight fade-in */}
-      <div className="absolute inset-0 bg-gray-900/80 animate-fadeIn" />
+      {/* Semi-transparent overlay for improved text contrast */}
+      <div
+        className="
+          absolute
+          inset-0
+          bg-gray-900/70
+          backdrop-blur-sm
+          animate-fadeIn
+        "
+      />
 
       {/* Hero Content */}
       <div
@@ -81,19 +89,34 @@ const HeroSection = () => {
               Change Lives
             </span>
           </h1>
+
+          {/* Optional Tagline / Subheading */}
           <p
             className="
-              mt-6
+              mt-3
               text-lg
               sm:text-xl
               lg:text-2xl
+              text-gray-100
+              italic
+            "
+          >
+            “A simple act of generosity can transform someone’s day.”
+          </p>
+
+          {/* Supporting Paragraph */}
+          <p
+            className="
+              mt-4
+              text-sm
+              sm:text-base
+              lg:text-lg
               text-gray-200
-              leading-relaxed
-              max-w-3xl
+              max-w-2xl
             "
           >
             Donate items or request help effortlessly. Your small act of charity
-            makes a big impact.
+            makes a big impact—one gift at a time.
           </p>
 
           <div className="flex flex-col sm:flex-row mt-8 gap-4">
@@ -141,7 +164,17 @@ const HeroSection = () => {
       </div>
 
       {/* Pagination Dots */}
-      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex space-x-3 animate-fadeIn">
+      <div
+        className="
+          absolute
+          bottom-6
+          left-1/2
+          -translate-x-1/2
+          flex
+          space-x-3
+          animate-fadeIn
+        "
+      >
         {images.map((_, index) => (
           <button
             key={index}

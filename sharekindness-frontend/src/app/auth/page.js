@@ -85,200 +85,377 @@ const AuthPage = () => {
 
   return (
     <BackgroundWrapper>
-      <div className="w-full max-w-md px-6 py-8 bg-white text-center rounded-lg shadow-lg">
-        <ToastContainer />
-        <h1 className="mb-4 text-3xl font-extrabold text-pink-500">SHAREKINDNESS</h1>
-        <p className="mb-6 text-lg italic text-gray-500">
-          “Small acts of kindness create big ripples of change.”
-        </p>
+      <ToastContainer />
 
-        <h2 className="mb-6 text-3xl font-bold text-gray-700">
-          {isRegister ? "Create an Account" : "Sign In"}
-        </h2>
-        <p className="mb-6 text-gray-500">
-          {isRegister ? "Already have an account? " : "New user? "}
-          <button
-            onClick={() => setIsRegister(!isRegister)}
-            className="text-pink-500 hover:underline"
+      {/* Outer container */}
+      <div
+        className="
+          flex
+          items-center
+          justify-center
+          min-h-screen
+          animate-fadeIn
+          px-4
+        "
+      >
+        {/* Auth Card */}
+        <div
+          className="
+            w-full
+            max-w-md
+            p-8
+            rounded-xl
+            bg-white/20
+            backdrop-blur-lg
+            shadow-xl
+            text-center
+            border border-white/30
+            animate-scaleIn
+          "
+        >
+          <h1
+            className="
+              mb-2
+              text-4xl
+              font-extrabold
+              text-transparent
+              bg-clip-text
+              bg-gradient-to-r
+              from-pink-500
+              to-yellow-500
+            "
           >
-            {isRegister ? "Sign In" : "Create an account"}
-          </button>
-        </p>
+            SHAREKINDNESS
+          </h1>
+          <p className="mb-6 text-lg italic text-pink-100">
+            "Small acts of kindness create big ripples of change."
+          </p>
 
-        <form className="space-y-6" onSubmit={handleSubmit}>
-          {isRegister ? (
-            <>
-              {/* Registration Form */}
-              <div>
-                <h3 className="text-left text-lg font-semibold text-gray-600 mb-2">
-                  Personal Information
-                </h3>
-                <label htmlFor="username" className="block text-left text-gray-700">
-                  Username
-                </label>
-                <input
-                  type="text"
-                  name="username"
-                  id="username"
-                  placeholder="Enter your username"
-                  required
-                  className="w-full mt-1 px-4 py-2 border rounded-lg text-black focus:ring-pink-500 focus:border-pink-500"
-                  onChange={handleChange}
-                />
-              </div>
-
-              <div>
-                <label htmlFor="bio" className="block text-left text-gray-700">
-                  Short Bio <span className="text-sm text-gray-500">(Max 50 words)</span>
-                </label>
-                <textarea
-                  name="bio"
-                  id="bio"
-                  placeholder="Write a short bio"
-                  rows="3"
-                  className="w-full mt-1 px-4 py-2 border rounded-lg text-black focus:ring-pink-500 focus:border-pink-500"
-                  onChange={handleChange}
-                ></textarea>
-                {bioError && <p className="text-red-500 text-sm mt-1">{bioError}</p>}
-              </div>
-
-              <div>
-                <h3 className="text-left text-lg font-semibold text-gray-600 mb-2">
-                  Contact Information
-                </h3>
-                <label htmlFor="email" className="block text-left text-gray-700">
-                  Email Address
-                </label>
-                <input
-                  type="email"
-                  name="email"
-                  id="email"
-                  placeholder="Enter your email"
-                  required
-                  className="w-full mt-1 px-4 py-2 border rounded-lg text-black focus:ring-pink-500 focus:border-pink-500"
-                  onChange={handleChange}
-                />
-
-                <label htmlFor="phone_number" className="block text-left text-gray-700 mt-4">
-                  Phone Number
-                </label>
-                <input
-                  type="text"
-                  name="phone_number"
-                  id="phone_number"
-                  placeholder="Enter your phone number"
-                  required
-                  className="w-full mt-1 px-4 py-2 border rounded-lg text-black focus:ring-pink-500 focus:border-pink-500"
-                  onChange={handleChange}
-                />
-              </div>
-
-              <div>
-                <h3 className="text-left text-lg font-semibold text-gray-600 mb-2">
-                  Location
-                </h3>
-                <label htmlFor="state" className="block text-left text-gray-700">
-                  State
-                </label>
-                <select
-                  name="state"
-                  id="state"
-                  required
-                  className="w-full mt-1 px-4 py-2 border rounded-lg text-black focus:ring-pink-500 focus:border-pink-500"
-                  onChange={(e) =>
-                    setFormData({ ...formData, state: e.target.value, city: "" })
-                  }
-                >
-                  <option value="" disabled>
-                    Select your state
-                  </option>
-                  {Object.keys(statesAndCities).map((state) => (
-                    <option key={state} value={state}>
-                      {state}
-                    </option>
-                  ))}
-                </select>
-
-                <label htmlFor="city" className="block text-left text-gray-700 mt-4">
-                  City
-                </label>
-                <select
-                  name="city"
-                  id="city"
-                  required
-                  disabled={!formData.state}
-                  className="w-full mt-1 px-4 py-2 border rounded-lg text-black focus:ring-pink-500 focus:border-pink-500"
-                  onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                >
-                  <option value="" disabled>
-                    Select your city
-                  </option>
-                  {statesAndCities[formData.state]?.map((city) => (
-                    <option key={city} value={city}>
-                      {city}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <h3 className="text-left text-lg font-semibold text-gray-600 mb-2">
-                  Profile Picture
-                </h3>
-                <label htmlFor="profile_picture" className="block text-left text-gray-700">
-                  Upload a profile picture
-                </label>
-                <input
-                  type="file"
-                  name="profile_picture"
-                  id="profile_picture"
-                  className="w-full mt-1 px-4 py-2 border rounded-lg text-black focus:ring-pink-500 focus:border-pink-500"
-                  onChange={handleChange}
-                />
-              </div>
-            </>
-          ) : (
-            <>
-              {/* Sign-In Form */}
-              <div>
-                <label htmlFor="email" className="block text-left text-gray-700">
-                  Email Address
-                </label>
-                <input
-                  type="email"
-                  name="email"
-                  id="email"
-                  placeholder="Enter your email"
-                  required
-                  className="w-full mt-1 px-4 py-2 border rounded-lg text-black focus:ring-pink-500 focus:border-pink-500"
-                  onChange={handleChange}
-                />
-              </div>
-
-              <div>
-                <label htmlFor="password" className="block text-left text-gray-700">
-                  Password
-                </label>
-                <input
-                  type="password"
-                  name="password"
-                  id="password"
-                  placeholder="Enter your password"
-                  required
-                  className="w-full mt-1 px-4 py-2 border rounded-lg text-black focus:ring-pink-500 focus:border-pink-500"
-                  onChange={handleChange}
-                />
-              </div>
-            </>
-          )}
-
-          <button
-            type="submit"
-            className="w-full px-4 py-2 text-white font-bold bg-pink-500 rounded-lg hover:bg-pink-600 focus:ring-2 focus:ring-pink-500 focus:ring-offset-2"
+          <h2
+            className="
+              mb-2
+              text-2xl
+              sm:text-3xl
+              font-bold
+              text-white
+              drop-shadow
+            "
           >
-            {isRegister ? "Sign Up" : "Sign In"}
-          </button>
-        </form>
+            {isRegister ? "Create an Account" : "Sign In"}
+          </h2>
+          <p className="mb-6 text-gray-100">
+            {isRegister ? "Already have an account? " : "New user? "}
+            <button
+              onClick={() => setIsRegister(!isRegister)}
+              className="
+                text-pink-200
+                font-medium
+                hover:text-pink-300
+                transition
+                underline
+              "
+            >
+              {isRegister ? "Sign In" : "Create an account"}
+            </button>
+          </p>
+
+          {/* Form */}
+          <form className="space-y-6" onSubmit={handleSubmit}>
+            {isRegister ? (
+              <>
+                {/* Registration Form */}
+                <div className="text-left">
+                  <label
+                    htmlFor="username"
+                    className="block text-sm font-semibold text-pink-50"
+                  >
+                    Username
+                  </label>
+                  <input
+                    type="text"
+                    name="username"
+                    id="username"
+                    placeholder="Enter your username"
+                    required
+                    className="
+                      w-full
+                      mt-1
+                      px-4 py-2
+                      border
+                      rounded-lg
+                      text-black
+                      focus:ring-pink-500
+                      focus:border-pink-500
+                    "
+                    onChange={handleChange}
+                  />
+                </div>
+
+                <div className="text-left">
+                  <label
+                    htmlFor="bio"
+                    className="block text-sm font-semibold text-pink-50"
+                  >
+                    Short Bio{" "}
+                    <span className="text-xs text-gray-200">
+                      (Max 50 words)
+                    </span>
+                  </label>
+                  <textarea
+                    name="bio"
+                    id="bio"
+                    placeholder="Write a short bio"
+                    rows="3"
+                    className="
+                      w-full
+                      mt-1
+                      px-4 py-2
+                      border
+                      rounded-lg
+                      text-black
+                      focus:ring-pink-500
+                      focus:border-pink-500
+                    "
+                    onChange={handleChange}
+                  ></textarea>
+                  {bioError && (
+                    <p className="text-red-400 text-sm mt-1">{bioError}</p>
+                  )}
+                </div>
+
+                <div className="text-left">
+                  <label
+                    htmlFor="email"
+                    className="block text-sm font-semibold text-pink-50"
+                  >
+                    Email Address
+                  </label>
+                  <input
+                    type="email"
+                    name="email"
+                    id="email"
+                    placeholder="Enter your email"
+                    required
+                    className="
+                      w-full
+                      mt-1
+                      px-4 py-2
+                      border
+                      rounded-lg
+                      text-black
+                      focus:ring-pink-500
+                      focus:border-pink-500
+                    "
+                    onChange={handleChange}
+                  />
+                </div>
+
+                <div className="text-left">
+                  <label
+                    htmlFor="phone_number"
+                    className="block text-sm font-semibold text-pink-50 mt-4"
+                  >
+                    Phone Number
+                  </label>
+                  <input
+                    type="text"
+                    name="phone_number"
+                    id="phone_number"
+                    placeholder="Enter your phone number"
+                    required
+                    className="
+                      w-full
+                      mt-1
+                      px-4 py-2
+                      border
+                      rounded-lg
+                      text-black
+                      focus:ring-pink-500
+                      focus:border-pink-500
+                    "
+                    onChange={handleChange}
+                  />
+                </div>
+
+                <div className="text-left">
+                  <label
+                    htmlFor="state"
+                    className="block text-sm font-semibold text-pink-50 mt-4"
+                  >
+                    State
+                  </label>
+                  <select
+                    name="state"
+                    id="state"
+                    required
+                    className="
+                      w-full
+                      mt-1
+                      px-4 py-2
+                      border
+                      rounded-lg
+                      text-black
+                      focus:ring-pink-500
+                      focus:border-pink-500
+                    "
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        state: e.target.value,
+                        city: "",
+                      })
+                    }
+                  >
+                    <option value="" disabled>
+                      Select your state
+                    </option>
+                    {Object.keys(statesAndCities).map((state) => (
+                      <option key={state} value={state}>
+                        {state}
+                      </option>
+                    ))}
+                  </select>
+
+                  <label
+                    htmlFor="city"
+                    className="block text-sm font-semibold text-pink-50 mt-4"
+                  >
+                    City
+                  </label>
+                  <select
+                    name="city"
+                    id="city"
+                    required
+                    disabled={!formData.state}
+                    className="
+                      w-full
+                      mt-1
+                      px-4 py-2
+                      border
+                      rounded-lg
+                      text-black
+                      focus:ring-pink-500
+                      focus:border-pink-500
+                    "
+                    onChange={(e) =>
+                      setFormData({ ...formData, city: e.target.value })
+                    }
+                  >
+                    <option value="" disabled>
+                      Select your city
+                    </option>
+                    {statesAndCities[formData.state]?.map((city) => (
+                      <option key={city} value={city}>
+                        {city}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="text-left">
+                  <label
+                    htmlFor="profile_picture"
+                    className="block text-sm font-semibold text-pink-50 mt-4"
+                  >
+                    Profile Picture
+                  </label>
+                  <input
+                    type="file"
+                    name="profile_picture"
+                    id="profile_picture"
+                    className="
+                      w-full
+                      mt-1
+                      px-4 py-2
+                      border
+                      rounded-lg
+                      text-black
+                      focus:ring-pink-500
+                      focus:border-pink-500
+                    "
+                    onChange={handleChange}
+                  />
+                </div>
+              </>
+            ) : (
+              <>
+                {/* Sign-In Form */}
+                <div className="text-left">
+                  <label
+                    htmlFor="email"
+                    className="block text-sm font-semibold text-pink-50"
+                  >
+                    Email Address
+                  </label>
+                  <input
+                    type="email"
+                    name="email"
+                    id="email"
+                    placeholder="Enter your email"
+                    required
+                    className="
+                      w-full
+                      mt-1
+                      px-4 py-2
+                      border
+                      rounded-lg
+                      text-black
+                      focus:ring-pink-500
+                      focus:border-pink-500
+                    "
+                    onChange={handleChange}
+                  />
+                </div>
+
+                <div className="text-left">
+                  <label
+                    htmlFor="password"
+                    className="block text-sm font-semibold text-pink-50"
+                  >
+                    Password
+                  </label>
+                  <input
+                    type="password"
+                    name="password"
+                    id="password"
+                    placeholder="Enter your password"
+                    required
+                    className="
+                      w-full
+                      mt-1
+                      px-4 py-2
+                      border
+                      rounded-lg
+                      text-black
+                      focus:ring-pink-500
+                      focus:border-pink-500
+                    "
+                    onChange={handleChange}
+                  />
+                </div>
+              </>
+            )}
+
+            <button
+              type="submit"
+              className="
+                w-full
+                py-3
+                text-white
+                font-bold
+                bg-pink-500
+                rounded-lg
+                hover:bg-pink-600
+                focus:ring-2
+                focus:ring-pink-500
+                focus:ring-offset-2
+                transition-all
+              "
+            >
+              {isRegister ? "Sign Up" : "Sign In"}
+            </button>
+          </form>
+        </div>
       </div>
     </BackgroundWrapper>
   );
