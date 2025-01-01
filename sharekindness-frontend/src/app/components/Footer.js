@@ -5,16 +5,16 @@ import {
   UserIcon,
   PlusIcon,
   XMarkIcon,
-} from "@heroicons/react/24/outline"; 
-import DonationModal from "./DonationModal"; 
+} from "@heroicons/react/24/outline";
+import DonationModal from "./DonationModal";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 const Footer = () => {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
-  const [isModalOpen, setIsModalOpen] = useState(false); 
-  const [activeTab, setActiveTab] = useState("home"); 
-  const [notificationCount, setNotificationCount] = useState(0); 
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState("home");
+  const [notificationCount, setNotificationCount] = useState(0);
 
   // Fetch notifications
   useEffect(() => {
@@ -230,7 +230,8 @@ const Footer = () => {
               onClick={() => setIsProfileOpen(false)}
               className="
                 absolute
-                top-4 right-4
+                top-4
+                right-4
                 text-gray-600
                 hover:text-gray-900
                 transition
@@ -240,9 +241,7 @@ const Footer = () => {
               <XMarkIcon className="w-5 h-5" />
             </button>
 
-            <h2 className="text-lg font-bold mb-4 text-gray-800">
-              Account
-            </h2>
+            <h2 className="text-lg font-bold mb-4 text-gray-800">Account</h2>
             <nav className="space-y-4">
               <a
                 href="/settings"
@@ -301,9 +300,9 @@ const Footer = () => {
           hidden
           sm:block
           pt-4 mt-4
-          border-t border-pink-400
           text-center
         "
+        /* Removed 'border-t border-pink-400' here */
       >
         <div className="flex justify-center space-x-6">
           <a

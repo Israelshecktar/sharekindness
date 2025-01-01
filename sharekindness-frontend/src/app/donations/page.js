@@ -6,6 +6,8 @@ import "react-toastify/dist/ReactToastify.css";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import SideModal from "./sideModal";
+// For cases with no image
+import { PhotoIcon } from "@heroicons/react/24/outline";
 
 const UserDashboard = () => {
   const [data, setData] = useState({ donations: [], requests: [] });
@@ -93,23 +95,18 @@ const UserDashboard = () => {
   return (
     <>
       <Header />
-      
-      {/* Outer wrapper: Very little horizontal padding on large screens */}
+
+      {/* Outer wrapper */}
       <div
         className="
           min-h-screen 
           bg-blue-100
           py-8 
-          px-2          /* minimal padding on mobile */
-          sm:px-4       /* slightly more on small */
-          lg:px-2       /* reduce side padding again on large screens */
+          px-2
+          sm:px-4
+          lg:px-2
         "
       >
-        {/* 
-          Inner wrapper: 
-          - max-w-4xl keeps container from stretching too wide 
-          - mx-auto centers it
-        */}
         <div className="max-w-4xl mx-auto">
           {/* Heading */}
           <div className="mb-10 text-center">
@@ -175,7 +172,31 @@ const UserDashboard = () => {
 
           {/* Loading State */}
           {loading && (
-            <p className="text-center text-gray-500 animate-pulse">Loading...</p>
+            <div className="flex items-center justify-center mb-8">
+              <div className="flex flex-col items-center space-y-2">
+                <svg
+                  className="animate-spin h-8 w-8 text-pink-600"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  ></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8v8H4z"
+                  ></path>
+                </svg>
+                <p className="text-gray-600">Loading your dashboard...</p>
+              </div>
+            </div>
           )}
 
           {/* Donations Grid */}
@@ -240,6 +261,7 @@ const UserDashboard = () => {
                         </span>
                       </div>
                     )}
+
                     {/* Donation Info */}
                     <h4
                       className="
@@ -256,7 +278,8 @@ const UserDashboard = () => {
                       {formatText(donation.donation.item_name)}
                     </h4>
                     <p className="text-gray-700 text-sm mb-1">
-                      <strong>Status:</strong> {formatText(donation.donation.status)}
+                      <strong>Status:</strong>{" "}
+                      {formatText(donation.donation.status)}
                     </p>
                     <p className="text-gray-700 text-sm mb-4">
                       <strong>Requests:</strong> {donation.requests.length}
@@ -353,6 +376,7 @@ const UserDashboard = () => {
                         </span>
                       </div>
                     )}
+
                     {/* Request Info */}
                     <h4
                       className="

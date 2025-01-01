@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import CategoryFilter from "./CategoryFilter";
-import DonationCard from "./DonationsCard";
+import DonationCard from "./DonationsCard"; 
 import SearchBar from "./SearchBar";
 import { toast, ToastContainer } from "react-toastify";
 
@@ -36,7 +36,9 @@ const DonationsGrid = () => {
           ...donation,
           image: donation.image.startsWith("http")
             ? donation.image
-            : `${process.env.NEXT_PUBLIC_API_URL.replace(/\/$/, "")}/${donation.image.replace(/^\//, "")}`,
+            : `${
+                process.env.NEXT_PUBLIC_API_URL.replace(/\/$/, "")
+              }/${donation.image.replace(/^\//, "")}`,
         }));
 
         setDonations(donationsWithAbsoluteImages);
@@ -64,66 +66,133 @@ const DonationsGrid = () => {
   });
 
   return (
-    <section className="p-4 bg-blue-100 min-h-screen pb-24">
+    <>
       <ToastContainer position="top-right" autoClose={3000} />
 
-      <div className="block sm:hidden mb-4">
-        <div className="flex overflow-x-scroll scrollbar-hide space-x-4 p-2">
-          {categories.map((category) => (
-            <button
-              key={category}
-              onClick={() => setSelectedCategory(category)}
-              className={`flex-shrink-0 px-4 py-2 text-sm font-semibold rounded-full 
-                ${
-                  selectedCategory === category
-                    ? "bg-pink-600 text-white"
-                    : "bg-blue-200 text-blue-800 hover:bg-blue-300"
-                } 
-                transition-colors`}
-            >
-              {category}
-            </button>
-          ))}
-        </div>
-      </div>
+      {/* Outer Section with Extra Bottom Padding */}
+      <section
+        className="
+          min-h-screen
+          bg-gradient-to-b from-blue-50 to-blue-100
+          py-8
+          px-4
+          pb-32  /* <-- increased bottom padding so last cards won't overlap footer */
+        "
+      >
+        <div className="max-w-7xl mx-auto">
+          {/* Mobile Category Pills */}
+          <div className="block sm:hidden mb-6">
+            <div className="flex overflow-x-scroll scrollbar-hide space-x-4 p-2">
+              {categories.map((category) => (
+                <button
+                  key={category}
+                  onClick={() => setSelectedCategory(category)}
+                  className={`
+                    flex-shrink-0
+                    px-4 py-2
+                    text-sm
+                    font-semibold
+                    rounded-full
+                    whitespace-nowrap
+                    border border-transparent
+                    transition-colors
+                    ${
+                      selectedCategory === category
+                        ? "bg-pink-600 text-white"
+                        : "bg-blue-200 text-blue-800 hover:bg-blue-300"
+                    }
+                  `}
+                >
+                  {category}
+                </button>
+              ))}
+            </div>
+          </div>
 
-      <div className="hidden sm:flex flex-row text-black justify-between items-center mb-6 gap-4">
-        <CategoryFilter
-          categories={categories}
-          selectedCategory={selectedCategory}
-          onSelectCategory={setSelectedCategory}
-        />
-        <SearchBar onSearch={setSearchQuery} />
-      </div>
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-        {loading ? (
-          <p className="text-center text-gray-500 col-span-full">
-            Loading donations...
-          </p>
-        ) : filteredDonations.length > 0 ? (
-          filteredDonations.map((donation) => (
-            <DonationCard
-              key={donation.id}
-              id={donation.id}
-              item_name={donation.item_name}
-              category={donation.category}
-              quantity={donation.quantity}
-              image={donation.image}
-              status={donation.status}
-              donorName={donation.donor_name} // Pass donor name to the card
+          {/* Desktop Filter + Search */}
+          <div
+            className="
+              hidden
+              sm:flex
+              flex-row
+              justify-between
+              items-center
+              mb-8
+              gap-4
+            "
+          >
+            <CategoryFilter
+              categories={categories}
+              selectedCategory={selectedCategory}
+              onSelectCategory={setSelectedCategory}
             />
-          ))
-        ) : (
-          <p className="text-center text-gray-500 col-span-full">
-            No donations match your search or perhaps you need to{" "}
-            <a href="/auth" className="text-pink-600">
-              Sign In
-            </a>
-          </p>
-        )}
-      </div>
-    </section>
+            <SearchBar onSearch={setSearchQuery} />
+          </div>
+
+          {/* Donations Grid */}
+          <div
+            className="
+              grid
+              grid-cols-1
+              sm:grid-cols-2
+              md:grid-cols-3
+              lg:grid-cols-4
+              gap-6
+              animate-fadeIn
+            "
+          >
+            {loading ? (
+              <div className="col-span-full flex items-center justify-center">
+                {/* Loading Spinner */}
+                <div className="flex flex-col items-center space-y-2">
+                  <svg
+                    className="animate-spin h-8 w-8 text-pink-600"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    ></circle>
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8v8H4z"
+                    ></path>
+                  </svg>
+                  <p className="text-gray-600">Loading donations...</p>
+                </div>
+              </div>
+            ) : filteredDonations.length > 0 ? (
+              filteredDonations.map((donation) => (
+                <DonationCard
+                  key={donation.id}
+                  id={donation.id}
+                  item_name={donation.item_name}
+                  category={donation.category}
+                  quantity={donation.quantity}
+                  image={donation.image}
+                  status={donation.status}
+                  donorName={donation.donor_name}
+                />
+              ))
+            ) : (
+              <p className="text-center text-gray-500 col-span-full">
+                No donations match your search or perhaps you need to{" "}
+                <a href="/auth" className="text-pink-600 underline">
+                  Sign In
+                </a>
+              </p>
+            )}
+          </div>
+        </div>
+      </section>
+    </>
   );
 };
 
