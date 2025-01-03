@@ -268,17 +268,53 @@ class UserDashboardView(APIView):
             return handle_error("Invalid action specified.", status.HTTP_400_BAD_REQUEST)
 
         try:
-            donation_request = Request.objects.get(id=request_id, donation__donor=request.user)
+            donation_request = Request.objects.select_related("donation").get(
+                id=request_id, donation__donor=request.user
+            )
         except Request.DoesNotExist:
             return handle_error("Request not found or not authorized.", status.HTTP_404_NOT_FOUND)
 
-        if action == "approve":
-            donation_request.status = "APPROVED"
-        elif action == "reject":
-            donation_request.status = "REJECTED"
+        # Ensure the donation is still available
+        donation = donation_request.donation
+        if donation.status in ["CLOSED", "CLAIMED"]:
+            return handle_error("This donation is no longer available for requests.", status.HTTP_400_BAD_REQUEST)
 
-        donation_request.save()
-        return Response({"message": f"Request {action}ed successfully."}, status=status.HTTP_200_OK)
+        if action == "approve":
+            if donation_request.status != "PENDING":
+                return handle_error("Request is already processed.", status.HTTP_400_BAD_REQUEST)
+
+            # Update the request status to approved
+            donation_request.status = "APPROVED"
+            donation_request.save()
+
+            # Subtract the requested quantity from the donation
+            donation.quantity -= donation_request.requested_quantity
+
+            # Close the donation if the quantity reaches zero
+            if donation.quantity <= 0:
+                donation.status = "CLOSED"
+            donation.save()
+
+            # Reject other pending requests for the same donation
+            Request.objects.filter(
+                donation=donation, status="PENDING"
+            ).exclude(id=donation_request.id).update(status="REJECTED")
+
+            return Response(
+                {"message": "Request approved successfully."}, status=status.HTTP_200_OK
+            )
+
+        elif action == "reject":
+            if donation_request.status != "PENDING":
+                return handle_error("Request is already processed.", status.HTTP_400_BAD_REQUEST)
+
+            # Update the request status to rejected
+            donation_request.status = "REJECTED"
+            donation_request.save()
+
+            return Response(
+                {"message": "Request rejected successfully."}, status=status.HTTP_200_OK
+            )
 
 
 class UserNotificationView(APIView):

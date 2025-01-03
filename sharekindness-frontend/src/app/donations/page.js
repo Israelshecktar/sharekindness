@@ -44,25 +44,31 @@ const UserDashboard = () => {
     fetchDashboardData();
   }, []);
 
-  const handleApproveSelected = async (selectedRequests) => {
+  const handleApproveSelected = async (selectedRequestId) => {
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}api/requests/approve-bulk/`,
+        `${process.env.NEXT_PUBLIC_API_URL}api/user-dashboard/`,
         {
           method: "POST",
           headers: {
             Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ request_ids: selectedRequests }),
+          body: JSON.stringify({
+            action: "approve",
+            request_id: selectedRequestId,
+          }),
         }
       );
 
+      const data = await response.json();
+
       if (!response.ok) {
-        throw new Error("Failed to approve selected requests.");
+        throw new Error(data.error || "Failed to approve the request.");
       }
 
-      toast.success("Selected requests approved!");
+      toast.success("Request approved successfully!");
+
       setData((prev) => ({
         ...prev,
         donations: prev.donations.map((donation) =>
@@ -70,7 +76,7 @@ const UserDashboard = () => {
             ? {
                 ...donation,
                 requests: donation.requests.map((request) =>
-                  selectedRequests.includes(request.id)
+                  request.id === selectedRequestId
                     ? { ...request, status: "APPROVED" }
                     : request
                 ),
@@ -78,6 +84,7 @@ const UserDashboard = () => {
             : donation
         ),
       }));
+
       setSelectedDonation(null);
     } catch (error) {
       toast.error(error.message);

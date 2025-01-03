@@ -1,15 +1,53 @@
 import { useState } from "react";
-import { Tooltip } from "react-tooltip"; 
+import { Tooltip } from "react-tooltip";
 import { XMarkIcon, EyeIcon } from "@heroicons/react/24/outline";
-// ^ Example usage of Heroicons. Install via `npm i @heroicons/react` or `yarn add @heroicons/react`.
+import { toast } from "react-toastify";
 
 const SideModal = ({ donation, onClose, onApproveSelected }) => {
   const [selectedRequest, setSelectedRequest] = useState(null);
   const [expandedImage, setExpandedImage] = useState(null);
+  const [isApproving, setIsApproving] = useState(false);
 
-  const handleApprove = () => {
-    if (!selectedRequest) return;
-    onApproveSelected([selectedRequest.id]);
+  const handleApprove = async () => {
+    if (!selectedRequest) {
+      toast.error("Please select a request to approve.");
+      return;
+    }
+
+    setIsApproving(true);
+
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}api/user-dashboard/`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+          },
+          body: JSON.stringify({
+            action: "approve",
+            request_id: selectedRequest.id,
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to approve the request.");
+      }
+
+      toast.success(
+        `Successfully approved request for ${selectedRequest.user.username}.`
+      );
+
+      // Refresh parent data or update UI after successful approval
+      onApproveSelected(selectedRequest.id);
+    } catch (error) {
+      toast.error(error.message || "An error occurred while approving.");
+    } finally {
+      setIsApproving(false);
+    }
   };
 
   const closeExpandedImage = () => setExpandedImage(null);
@@ -197,8 +235,11 @@ const SideModal = ({ donation, onClose, onApproveSelected }) => {
                     hover:bg-pink-600 
                     transition-colors
                   "
+                  disabled={isApproving}
                 >
-                  Approve {selectedRequest.user.username}
+                  {isApproving
+                    ? `Approving ${selectedRequest.user.username}...`
+                    : `Approve ${selectedRequest.user.username}`}
                 </button>
                 <Tooltip id={`tooltip-expanded-${selectedRequest.id}`} />
               </div>
