@@ -76,16 +76,17 @@ const Header = () => {
         hidden sm:block
         relative
         z-40
-        bg-gradient-to-r from-pink-500 via-pink-600 to-pink-700
-        text-white
+        bg-blue-100
+        text-gray-800
         p-4
-        shadow-md
+        border-b
+        border-gray-200
+        shadow-sm
       "
     >
       <div className="max-w-7xl mx-auto flex items-center justify-between">
         {/* Logo & Branding */}
         <div className="flex items-center space-x-3">
-          {/* Optional: subtle hover scale on the logo */}
           <img
             src="/ShareKindness-Logo.png"
             alt="ShareKindness Logo"
@@ -99,24 +100,19 @@ const Header = () => {
           <div className="flex flex-col leading-tight">
             <h1
               className="
-                text-2xl
-                sm:text-3xl
-                font-extrabold
+                text-xl sm:text-2xl
+                font-bold
                 tracking-wide
                 transition
               "
             >
               ShareKindness
             </h1>
-            {/* Tagline (small, italic text) */}
             <span
               className="
-                italic
-                text-sm
-                sm:text-base
-                text-pink-100
+                text-sm sm:text-base
+                text-gray-500
                 mt-0.5
-                transition
               "
             >
               Empowering Good Deeds, One Act at a Time
@@ -125,26 +121,25 @@ const Header = () => {
         </div>
 
         {/* Navigation */}
-        <nav className="flex space-x-8">
+        <nav className="flex space-x-8 text-sm sm:text-base font-medium">
           {/* Home */}
           <a
             href="/dashboard"
             onClick={() => setActiveTab("home")}
             className={`
               flex items-center
-              text-lg sm:text-xl
-              transition
+              transition-colors
               ${
                 activeTab === "home"
-                  ? "text-yellow-300"
-                  : "hover:text-yellow-200"
+                  ? "text-indigo-600"
+                  : "text-gray-600 hover:text-indigo-500"
               }
             `}
           >
             <HomeIcon
               className={`
-                w-6 h-6 mr-2
-                ${activeTab === "home" ? "text-yellow-300" : ""}
+                w-5 h-5 mr-2
+                ${activeTab === "home" ? "text-indigo-600" : ""}
               `}
             />
             <span>Home</span>
@@ -156,21 +151,19 @@ const Header = () => {
             onClick={() => setActiveTab("dashboard")}
             className={`
               relative
-              flex
-              items-center
-              text-lg sm:text-xl
-              transition
+              flex items-center
+              transition-colors
               ${
                 activeTab === "dashboard"
-                  ? "text-yellow-300"
-                  : "hover:text-yellow-200"
+                  ? "text-indigo-600"
+                  : "text-gray-600 hover:text-indigo-500"
               }
             `}
           >
             <Squares2X2Icon
               className={`
-                w-6 h-6 mr-2
-                ${activeTab === "dashboard" ? "text-yellow-300" : ""}
+                w-5 h-5 mr-2
+                ${activeTab === "dashboard" ? "text-indigo-600" : ""}
               `}
             />
             <span>Dashboard</span>
@@ -205,21 +198,19 @@ const Header = () => {
                 setActiveTab("profile");
               }}
               className={`
-                flex
-                items-center
-                text-lg sm:text-xl
-                transition
+                flex items-center
+                transition-colors
                 ${
                   activeTab === "profile"
-                    ? "text-yellow-300"
-                    : "hover:text-yellow-200"
+                    ? "text-indigo-600"
+                    : "text-gray-600 hover:text-indigo-500"
                 }
               `}
             >
               <UserIcon
                 className={`
-                  w-6 h-6 mr-2
-                  ${activeTab === "profile" ? "text-yellow-300" : ""}
+                  w-5 h-5 mr-2
+                  ${activeTab === "profile" ? "text-indigo-600" : ""}
                 `}
               />
               <span>Account</span>

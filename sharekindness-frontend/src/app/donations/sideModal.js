@@ -1,20 +1,21 @@
 import { useState } from "react";
 import { Tooltip } from "react-tooltip";
 import { XMarkIcon, EyeIcon } from "@heroicons/react/24/outline";
-import { toast } from "react-toastify";
 
 const SideModal = ({ donation, onClose, onApproveSelected }) => {
   const [selectedRequest, setSelectedRequest] = useState(null);
   const [expandedImage, setExpandedImage] = useState(null);
   const [isApproving, setIsApproving] = useState(false);
+  const [modalMessage, setModalMessage] = useState(null);
 
   const handleApprove = async () => {
     if (!selectedRequest) {
-      toast.error("Please select a request to approve.");
+      setModalMessage({ type: "error", text: "Please select a request to approve." });
       return;
     }
 
     setIsApproving(true);
+    setModalMessage(null); // Clear any previous messages
 
     try {
       const response = await fetch(
@@ -37,14 +38,15 @@ const SideModal = ({ donation, onClose, onApproveSelected }) => {
         throw new Error(errorData.error || "Failed to approve the request.");
       }
 
-      toast.success(
-        `Successfully approved request for ${selectedRequest.user.username}.`
-      );
+      setModalMessage({
+        type: "success",
+        text: `Successfully approved request for ${selectedRequest.user.username}.`,
+      });
 
       // Refresh parent data or update UI after successful approval
       onApproveSelected(selectedRequest.id);
     } catch (error) {
-      toast.error(error.message || "An error occurred while approving.");
+      setModalMessage({ type: "error", text: error.message || "An error occurred while approving." });
     } finally {
       setIsApproving(false);
     }
@@ -71,7 +73,7 @@ const SideModal = ({ donation, onClose, onApproveSelected }) => {
             relative 
             w-full max-w-lg 
             h-full 
-            bg-white 
+            bg-white
             shadow-xl 
             flex flex-col 
             overflow-y-auto 
@@ -89,8 +91,6 @@ const SideModal = ({ donation, onClose, onApproveSelected }) => {
               p-1.5
             "
             aria-label="Close Modal"
-            data-tooltip-id="tooltip-close"
-            data-tooltip-content="Close the requests panel"
           >
             <XMarkIcon className="w-6 h-6" />
           </button>
@@ -101,6 +101,17 @@ const SideModal = ({ donation, onClose, onApproveSelected }) => {
               Requests for {donation?.donation?.item_name}
             </h2>
           </div>
+
+          {/* Message Display */}
+          {modalMessage && (
+            <div
+              className={`px-4 py-2 text-center ${
+                modalMessage.type === "success" ? "text-green-600" : "text-red-600"
+              }`}
+            >
+              {modalMessage.text}
+            </div>
+          )}
 
           {/* Requests List */}
           <div className="px-6 pb-6">
@@ -124,23 +135,16 @@ const SideModal = ({ donation, onClose, onApproveSelected }) => {
                       <img
                         src={request.user.profile_picture || "/default-profile.jpg"}
                         alt={`${request.user.username}'s profile`}
-                        className="
-                          w-12 h-12 rounded-full border 
-                          cursor-pointer object-cover
-                        "
+                        className="w-12 h-12 rounded-full border cursor-pointer object-cover"
                         onClick={() =>
                           setExpandedImage(
                             request.user.profile_picture || "/default-profile.jpg"
                           )
                         }
-                        data-tooltip-id={`tooltip-${request.id}`}
-                        data-tooltip-content="Click to expand profile picture"
                       />
 
                       <div>
-                        <p className="text-gray-800 font-semibold">
-                          {request.user.username}
-                        </p>
+                        <p className="text-gray-800 font-semibold">{request.user.username}</p>
                         <p className="text-sm text-gray-500">
                           {request.user.city}, {request.user.state}
                         </p>
@@ -159,20 +163,14 @@ const SideModal = ({ donation, onClose, onApproveSelected }) => {
                         transition-colors
                       "
                       aria-label="View Profile"
-                      data-tooltip-id={`tooltip-view-${request.id}`}
-                      data-tooltip-content="View detailed profile"
                     >
                       <EyeIcon className="w-5 h-5" />
                     </button>
-                    <Tooltip id={`tooltip-${request.id}`} />
-                    <Tooltip id={`tooltip-view-${request.id}`} />
                   </li>
                 ))}
               </ul>
             ) : (
-              <p className="text-center text-gray-500">
-                No requests for this donation yet.
-              </p>
+              <p className="text-center text-gray-500">No requests for this donation yet.</p>
             )}
           </div>
 
@@ -188,20 +186,12 @@ const SideModal = ({ donation, onClose, onApproveSelected }) => {
                   <img
                     src={selectedRequest.user.profile_picture || "/default-profile.jpg"}
                     alt={`${selectedRequest.user.username}'s profile`}
-                    className="
-                      w-16 h-16 
-                      rounded-full 
-                      border 
-                      cursor-pointer 
-                      object-cover
-                    "
+                    className="w-16 h-16 rounded-full border cursor-pointer object-cover"
                     onClick={() =>
                       setExpandedImage(
                         selectedRequest.user.profile_picture || "/default-profile.jpg"
                       )
                     }
-                    data-tooltip-id={`tooltip-expanded-${selectedRequest.id}`}
-                    data-tooltip-content="Click to expand"
                   />
                   <div>
                     <p className="text-gray-600">
@@ -241,7 +231,6 @@ const SideModal = ({ donation, onClose, onApproveSelected }) => {
                     ? `Approving ${selectedRequest.user.username}...`
                     : `Approve ${selectedRequest.user.username}`}
                 </button>
-                <Tooltip id={`tooltip-expanded-${selectedRequest.id}`} />
               </div>
             </div>
           )}
@@ -293,7 +282,6 @@ const SideModal = ({ donation, onClose, onApproveSelected }) => {
               hover:bg-opacity-90 
               transition-colors
             "
-            aria-label="Close expanded profile picture"
           >
             <XMarkIcon className="w-6 h-6" />
           </button>
