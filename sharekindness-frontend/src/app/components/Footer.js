@@ -9,6 +9,7 @@ import {
 import DonationModal from "./DonationModal";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import api from "../utils/api";
 
 const Footer = () => {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
@@ -20,56 +21,33 @@ const Footer = () => {
   useEffect(() => {
     const fetchNotifications = async () => {
       try {
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}api/user-notifications/`,
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-            },
-          }
-        );
-
-        if (!response.ok) {
-          throw new Error("Failed to fetch notifications.");
-        }
-
-        const data = await response.json();
-        setNotificationCount(data.pending_requests + data.pending_donations);
+        const response = await api.get("api/user-notifications/");
+        const { pending_requests = 0, pending_donations = 0 } = response || {};
+        setNotificationCount(pending_requests + pending_donations);
       } catch (error) {
-        console.error(error.message);
-        toast.error("Unable to fetch notifications.");
+        toast.error(
+          error.response?.data?.detail || "Unable to fetch notifications."
+        );
       }
     };
 
     fetchNotifications();
   }, []);
 
+  // Logout Logic
   const handleLogout = async () => {
     try {
       const refresh = localStorage.getItem("refreshToken");
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}api/logout/`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-          },
-          body: JSON.stringify({ refresh }),
-        }
-      );
+      await api.post("api/logout/", { refresh });
 
-      if (response.ok) {
-        toast.success("Logout successful!");
-        localStorage.removeItem("accessToken");
-        localStorage.removeItem("refreshToken");
-        window.location.href = "/auth";
-      } else {
-        const data = await response.json();
-        toast.error(data.detail || "Logout failed!");
-      }
+      toast.success("Logout successful!");
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("refreshToken");
+      window.location.href = "/auth"; // Redirect to the auth page
     } catch (error) {
-      toast.error("An error occurred during logout!");
+      toast.error(
+        error.response?.data?.detail || "An error occurred during logout."
+      );
     }
   };
 
@@ -102,17 +80,14 @@ const Footer = () => {
         <a
           href="/dashboard"
           onClick={() => setActiveTab("home")}
-          className={`
-            flex flex-col items-center transition
-            ${activeTab === "home" ? "text-yellow-300" : "hover:text-gray-200"}
-          `}
+          className={`flex flex-col items-center transition ${
+            activeTab === "home" ? "text-yellow-300" : "hover:text-gray-200"
+          }`}
         >
           <HomeIcon
-            className={`
-              w-6 h-6 mb-1
-              ${activeTab === "home" ? "text-yellow-300" : ""}
-              hover:scale-110 transform transition
-            `}
+            className={`w-6 h-6 mb-1 ${
+              activeTab === "home" ? "text-yellow-300" : ""
+            } hover:scale-110 transform transition`}
           />
           <span>Home</span>
         </a>
@@ -123,22 +98,16 @@ const Footer = () => {
             setIsModalOpen(true);
             setActiveTab("add");
           }}
-          className={`
-            flex flex-col items-center transition
-            ${activeTab === "add" ? "text-yellow-300" : "hover:text-gray-200"}
-          `}
+          className={`flex flex-col items-center transition ${
+            activeTab === "add" ? "text-yellow-300" : "hover:text-gray-200"
+          }`}
         >
           <div
-            className={`
-              flex items-center justify-center
-              w-10 h-10 rounded-full
-              transition-all
-              ${
-                activeTab === "add"
-                  ? "bg-yellow-300"
-                  : "bg-pink-700 hover:bg-pink-800"
-              }
-            `}
+            className={`flex items-center justify-center w-10 h-10 rounded-full transition-all ${
+              activeTab === "add"
+                ? "bg-yellow-300"
+                : "bg-pink-700 hover:bg-pink-800"
+            }`}
           >
             <PlusIcon className="w-5 h-5 text-white" />
           </div>
@@ -149,21 +118,16 @@ const Footer = () => {
         <a
           href="/donations"
           onClick={() => setActiveTab("dashboard")}
-          className={`
-            flex flex-col items-center relative transition
-            ${
-              activeTab === "dashboard"
-                ? "text-yellow-300"
-                : "hover:text-gray-200"
-            }
-          `}
+          className={`flex flex-col items-center relative transition ${
+            activeTab === "dashboard"
+              ? "text-yellow-300"
+              : "hover:text-gray-200"
+          }`}
         >
           <Squares2X2Icon
-            className={`
-              w-6 h-6 mb-1
-              ${activeTab === "dashboard" ? "text-yellow-300" : ""}
-              hover:scale-110 transform transition
-            `}
+            className={`w-6 h-6 mb-1 ${
+              activeTab === "dashboard" ? "text-yellow-300" : ""
+            } hover:scale-110 transform transition`}
           />
           <span>Dashboard</span>
           {notificationCount > 0 && (
@@ -191,21 +155,16 @@ const Footer = () => {
             setIsProfileOpen(true);
             setActiveTab("profile");
           }}
-          className={`
-            flex flex-col items-center transition
-            ${
-              activeTab === "profile"
-                ? "text-yellow-300"
-                : "hover:text-gray-200"
-            }
-          `}
+          className={`flex flex-col items-center transition ${
+            activeTab === "profile"
+              ? "text-yellow-300"
+              : "hover:text-gray-200"
+          }`}
         >
           <UserIcon
-            className={`
-              w-6 h-6 mb-1
-              ${activeTab === "profile" ? "text-yellow-300" : ""}
-              hover:scale-110 transform transition
-            `}
+            className={`w-6 h-6 mb-1 ${
+              activeTab === "profile" ? "text-yellow-300" : ""
+            } hover:scale-110 transform transition`}
           />
           <span>Account</span>
         </button>
@@ -228,14 +187,7 @@ const Footer = () => {
             {/* Close Button */}
             <button
               onClick={() => setIsProfileOpen(false)}
-              className="
-                absolute
-                top-4
-                right-4
-                text-gray-600
-                hover:text-gray-900
-                transition
-              "
+              className="absolute top-4 right-4 text-gray-600 hover:text-gray-900 transition"
               aria-label="Close Modal"
             >
               <XMarkIcon className="w-5 h-5" />
@@ -245,48 +197,20 @@ const Footer = () => {
             <nav className="space-y-4">
               <a
                 href="/settings"
-                className="
-                  block
-                  w-full
-                  px-4 py-2
-                  text-left
-                  rounded-lg
-                  text-gray-700
-                  hover:text-gray-900
-                  hover:bg-gray-100
-                  transition
-                "
+                className="block w-full px-4 py-2 text-left rounded-lg text-gray-700 hover:text-gray-900 hover:bg-gray-100 transition"
               >
                 Settings
               </a>
               <button
                 onClick={handleLogout}
-                className="
-                  block
-                  w-full
-                  text-left
-                  px-4 py-2
-                  text-red-500
-                  hover:bg-gray-100
-                  hover:text-red-600
-                  transition
-                "
+                className="block w-full text-left px-4 py-2 text-red-500 hover:bg-gray-100 hover:text-red-600 transition"
               >
                 Sign Out
               </button>
             </nav>
             <button
               onClick={() => setIsProfileOpen(false)}
-              className="
-                mt-6
-                w-full
-                py-2
-                bg-pink-500
-                text-white
-                rounded-lg
-                hover:bg-pink-600
-                transition
-              "
+              className="mt-6 w-full py-2 bg-pink-500 text-white rounded-lg hover:bg-pink-600 transition"
             >
               Close
             </button>
@@ -295,46 +219,23 @@ const Footer = () => {
       )}
 
       {/* Footer Content (Large screens) */}
-      <div
-        className="
-          hidden
-          sm:block
-          pt-4 mt-4
-          text-center
-        "
-        /* Removed 'border-t border-pink-400' here */
-      >
+      <div className="hidden sm:block pt-4 mt-4 text-center">
         <div className="flex justify-center space-x-6">
           <a
             href="#"
-            className="
-              underline
-              text-sm
-              hover:text-gray-100
-              transition
-            "
+            className="underline text-sm hover:text-gray-100 transition"
           >
             About Us
           </a>
           <a
             href="#"
-            className="
-              underline
-              text-sm
-              hover:text-gray-100
-              transition
-            "
+            className="underline text-sm hover:text-gray-100 transition"
           >
             Contact
           </a>
           <a
             href="#"
-            className="
-              underline
-              text-sm
-              hover:text-gray-100
-              transition
-            "
+            className="underline text-sm hover:text-gray-100 transition"
           >
             Privacy Policy
           </a>

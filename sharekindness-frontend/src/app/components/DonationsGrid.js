@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import CategoryFilter from "./CategoryFilter";
-import DonationCard from "./DonationsCard"; 
+import DonationCard from "./DonationsCard";
 import SearchBar from "./SearchBar";
 import { toast, ToastContainer } from "react-toastify";
+import api from "../utils/api"; // Import the centralized API handler
 
 const DonationsGrid = () => {
   const [donations, setDonations] = useState([]);
@@ -15,24 +16,10 @@ const DonationsGrid = () => {
   useEffect(() => {
     const fetchDonations = async () => {
       setLoading(true);
-      const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}api/donations/`;
-
       try {
-        const response = await fetch(apiUrl, {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-          },
-        });
+        const response = await api.get("api/donations/");
 
-        if (!response.ok) {
-          const errorData = await response.json();
-          toast.error(errorData.detail || "Failed to fetch donations.");
-          throw new Error(errorData.detail || "Failed to fetch donations.");
-        }
-
-        const data = await response.json();
-
-        const donationsWithAbsoluteImages = data.map((donation) => ({
+        const donationsWithAbsoluteImages = response.map((donation) => ({
           ...donation,
           image: donation.image.startsWith("http")
             ? donation.image
@@ -43,7 +30,7 @@ const DonationsGrid = () => {
 
         setDonations(donationsWithAbsoluteImages);
       } catch (error) {
-        toast.error(error.message);
+        toast.error(error.message || "Failed to fetch donations.");
       } finally {
         setLoading(false);
       }

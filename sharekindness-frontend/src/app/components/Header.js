@@ -6,6 +6,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import api from "../utils/api"; // Import centralized API handler
 
 const Header = () => {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
@@ -16,24 +17,13 @@ const Header = () => {
   useEffect(() => {
     const fetchNotifications = async () => {
       try {
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}api/user-notifications/`,
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-            },
-          }
-        );
-
-        if (!response.ok) {
-          throw new Error("Failed to fetch notifications.");
-        }
-
-        const data = await response.json();
-        setNotificationCount(data.pending_requests + data.pending_donations);
+        const response = await api.get("api/user-notifications/");
+        const { pending_requests = 0, pending_donations = 0 } = response || {};
+        setNotificationCount(pending_requests + pending_donations);
       } catch (error) {
-        console.error(error.message);
-        toast.error("Unable to fetch notifications.");
+        toast.error(
+          error.response?.data?.detail || "Unable to fetch notifications."
+        );
       }
     };
 
@@ -44,29 +34,16 @@ const Header = () => {
   const handleLogout = async () => {
     try {
       const refresh = localStorage.getItem("refreshToken");
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}api/logout/`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-          },
-          body: JSON.stringify({ refresh }),
-        }
-      );
+      await api.post("api/logout/", { refresh });
 
-      if (response.ok) {
-        toast.success("Logout successful!");
-        localStorage.removeItem("accessToken");
-        localStorage.removeItem("refreshToken");
-        window.location.href = "/auth";
-      } else {
-        const data = await response.json();
-        toast.error(data.detail || "Logout failed!");
-      }
+      toast.success("Logout successful!");
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("refreshToken");
+      window.location.href = "/auth"; // Redirect to the auth page
     } catch (error) {
-      toast.error("An error occurred during logout!");
+      toast.error(
+        error.response?.data?.detail || "An error occurred during logout."
+      );
     }
   };
 
@@ -126,21 +103,16 @@ const Header = () => {
           <a
             href="/dashboard"
             onClick={() => setActiveTab("home")}
-            className={`
-              flex items-center
-              transition-colors
-              ${
-                activeTab === "home"
-                  ? "text-indigo-600"
-                  : "text-gray-600 hover:text-indigo-500"
-              }
-            `}
+            className={`flex items-center transition-colors ${
+              activeTab === "home"
+                ? "text-indigo-600"
+                : "text-gray-600 hover:text-indigo-500"
+            }`}
           >
             <HomeIcon
-              className={`
-                w-5 h-5 mr-2
-                ${activeTab === "home" ? "text-indigo-600" : ""}
-              `}
+              className={`w-5 h-5 mr-2 ${
+                activeTab === "home" ? "text-indigo-600" : ""
+              }`}
             />
             <span>Home</span>
           </a>
@@ -149,22 +121,16 @@ const Header = () => {
           <a
             href="/donations"
             onClick={() => setActiveTab("dashboard")}
-            className={`
-              relative
-              flex items-center
-              transition-colors
-              ${
-                activeTab === "dashboard"
-                  ? "text-indigo-600"
-                  : "text-gray-600 hover:text-indigo-500"
-              }
-            `}
+            className={`relative flex items-center transition-colors ${
+              activeTab === "dashboard"
+                ? "text-indigo-600"
+                : "text-gray-600 hover:text-indigo-500"
+            }`}
           >
             <Squares2X2Icon
-              className={`
-                w-5 h-5 mr-2
-                ${activeTab === "dashboard" ? "text-indigo-600" : ""}
-              `}
+              className={`w-5 h-5 mr-2 ${
+                activeTab === "dashboard" ? "text-indigo-600" : ""
+              }`}
             />
             <span>Dashboard</span>
             {notificationCount > 0 && (
@@ -197,21 +163,16 @@ const Header = () => {
                 setIsProfileOpen((prev) => !prev);
                 setActiveTab("profile");
               }}
-              className={`
-                flex items-center
-                transition-colors
-                ${
-                  activeTab === "profile"
-                    ? "text-indigo-600"
-                    : "text-gray-600 hover:text-indigo-500"
-                }
-              `}
+              className={`flex items-center transition-colors ${
+                activeTab === "profile"
+                  ? "text-indigo-600"
+                  : "text-gray-600 hover:text-indigo-500"
+              }`}
             >
               <UserIcon
-                className={`
-                  w-5 h-5 mr-2
-                  ${activeTab === "profile" ? "text-indigo-600" : ""}
-                `}
+                className={`w-5 h-5 mr-2 ${
+                  activeTab === "profile" ? "text-indigo-600" : ""
+                }`}
               />
               <span>Account</span>
             </button>

@@ -6,7 +6,7 @@ import "react-toastify/dist/ReactToastify.css";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import SideModal from "./sideModal";
-// For cases with no image
+import api from "../utils/api";
 import { PhotoIcon, CheckCircleIcon, XCircleIcon } from "@heroicons/react/24/outline";
 
 const STATUS_STYLES = {
@@ -42,23 +42,10 @@ const UserDashboard = () => {
     const fetchDashboardData = async () => {
       setLoading(true);
       try {
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}api/user-dashboard/`,
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-            },
-          }
-        );
-
-        if (!response.ok) {
-          throw new Error("Failed to fetch dashboard data.");
-        }
-
-        const result = await response.json();
-        setData(result);
+        const response = await api.get("api/user-dashboard/"); // Use centralized API handler
+        setData(response);
       } catch (error) {
-        toast.error(error.message);
+        toast.error(error.response?.data?.detail || "Failed to fetch dashboard data.");
       } finally {
         setLoading(false);
       }
@@ -69,26 +56,10 @@ const UserDashboard = () => {
 
   const handleApproveSelected = async (selectedRequestId) => {
     try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}api/user-dashboard/`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            action: "approve",
-            request_id: selectedRequestId,
-          }),
-        }
-      );
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || "Failed to approve the request.");
-      }
+      const response = await api.post("api/user-dashboard/", {
+        action: "approve",
+        request_id: selectedRequestId,
+      });
 
       toast.success("Request approved successfully!");
 
@@ -110,7 +81,7 @@ const UserDashboard = () => {
 
       setSelectedDonation(null);
     } catch (error) {
-      toast.error(error.message);
+      toast.error(error.response?.data?.error || "Failed to approve the request.");
     }
   };
 
@@ -192,7 +163,8 @@ const UserDashboard = () => {
 
           {/* Donations and Requests */}
           {!loading && (
-            <div>
+            <div className="pb-24">
+              {/* Donations Tab */}
               {activeTab === "donations" && (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                   {data.donations.length > 0 ? (
@@ -201,7 +173,6 @@ const UserDashboard = () => {
                         key={donation.donation.id}
                         className="p-4 bg-white shadow-md hover:shadow-xl rounded-lg border border-gray-200 transition-transform transform hover:-translate-y-1 flex flex-col animate-scaleIn"
                       >
-                        {/* Donation Image */}
                         {donation.donation.image ? (
                           <img
                             src={getImageUrl(donation.donation.image)}
@@ -217,7 +188,6 @@ const UserDashboard = () => {
                           </div>
                         )}
 
-                        {/* Donation Info */}
                         <h4 className="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-yellow-500 mb-2">
                           {donation.donation.item_name}
                         </h4>
@@ -225,7 +195,6 @@ const UserDashboard = () => {
                           <strong>Requests:</strong> {donation.requests.length}
                         </p>
 
-                        {/* Review Requests Button */}
                         <button
                           onClick={() => setSelectedDonation(donation)}
                           className="mt-auto py-2 w-full font-semibold text-white rounded-md bg-gradient-to-r from-pink-500 to-yellow-500 hover:from-pink-600 hover:to-yellow-600 transition focus:outline-none"
@@ -240,6 +209,7 @@ const UserDashboard = () => {
                 </div>
               )}
 
+              {/* Requests Tab */}
               {activeTab === "requests" && (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                   {data.requests.length > 0 ? (
@@ -251,7 +221,6 @@ const UserDashboard = () => {
                           key={request.id}
                           className="p-4 bg-white shadow-md hover:shadow-xl rounded-lg border border-gray-200 transition-transform transform hover:-translate-y-1 animate-scaleIn"
                         >
-                          {/* Request Image */}
                           {request.donation.image ? (
                             <img
                               src={getImageUrl(request.donation.image)}
@@ -267,7 +236,6 @@ const UserDashboard = () => {
                             </div>
                           )}
 
-                          {/* Request Info */}
                           <h4 className="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-yellow-500 mb-2">
                             {request.donation.item_name}
                           </h4>
