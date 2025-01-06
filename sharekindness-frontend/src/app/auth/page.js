@@ -225,7 +225,155 @@ const AuthPage = () => {
                       <p className="text-red-400 text-sm mt-1">{bioError}</p>
                     )}
                   </div>
-                  {/* Add other fields similarly */}
+                  <div className="text-left">
+                    <label
+                      htmlFor="email"
+                      className="block text-sm font-semibold text-pink-50"
+                    >
+                      Email Address
+                    </label>
+                    <input
+                      type="email"
+                      name="email"
+                      id="email"
+                      placeholder="Enter your email"
+                      required
+                      className="
+                        w-full
+                        mt-1
+                        px-4 py-2
+                        border
+                        rounded-lg
+                        text-black
+                        focus:ring-pink-500
+                        focus:border-pink-500
+                      "
+                      onChange={handleChange}
+                    />
+                  </div>
+                  <div className="text-left">
+                    <label
+                      htmlFor="phone_number"
+                      className="block text-sm font-semibold text-pink-50 mt-4"
+                    >
+                      Phone Number
+                    </label>
+                    <input
+                      type="text"
+                      name="phone_number"
+                      id="phone_number"
+                      placeholder="Enter your phone number"
+                      required
+                      className="
+                        w-full
+                        mt-1
+                        px-4 py-2
+                        border
+                        rounded-lg
+                        text-black
+                        focus:ring-pink-500
+                        focus:border-pink-500
+                      "
+                      onChange={handleChange}
+                    />
+                  </div>
+                  <div className="text-left">
+                    <label
+                      htmlFor="state"
+                      className="block text-sm font-semibold text-pink-50 mt-4"
+                    >
+                      State
+                    </label>
+                    <select
+                      name="state"
+                      id="state"
+                      required
+                      className="
+                        w-full
+                        mt-1
+                        px-4 py-2
+                        border
+                        rounded-lg
+                        text-black
+                        focus:ring-pink-500
+                        focus:border-pink-500
+                      "
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          state: e.target.value,
+                          city: "",
+                        })
+                      }
+                    >
+                      <option value="" disabled>
+                        Select your state
+                      </option>
+                      {Object.keys(statesAndCities).map((state) => (
+                        <option key={state} value={state}>
+                          {state}
+                        </option>
+                      ))}
+                    </select>
+                    <label
+                      htmlFor="city"
+                      className="block text-sm font-semibold text-pink-50 mt-4"
+                    >
+                      City
+                    </label>
+                    <select
+                      name="city"
+                      id="city"
+                      required
+                      disabled={!formData.state}
+                      className="
+                        w-full
+                        mt-1
+                        px-4 py-2
+                        border
+                        rounded-lg
+                        text-black
+                        focus:ring-pink-500
+                        focus:border-pink-500
+                      "
+                      onChange={(e) =>
+                        setFormData({ ...formData, city: e.target.value })
+                      }
+                    >
+                      <option value="" disabled>
+                        Select your city
+                      </option>
+                      {statesAndCities[formData.state]?.map((city) => (
+                        <option key={city} value={city}>
+                          {city}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="text-left">
+                    <label
+                      htmlFor="profile_picture"
+                      className="block text-sm font-semibold text-pink-50 mt-4"
+                    >
+                      Profile Picture
+                    </label>
+                    <input
+                      type="file"
+                      name="profile_picture"
+                      id="profile_picture"
+                      className="
+                        w-full
+                        mt-1
+                        px-4 py-2
+                        border
+                        rounded-lg
+                        text-grey-700
+                        focus:ring-pink-500
+                        focus:border-pink-500
+                      "
+                      onChange={handleChange}
+                    />
+                  </div>
                 </>
               ) : (
                 <>
