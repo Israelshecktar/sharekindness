@@ -137,6 +137,7 @@ const DonationModal = ({ onClose }) => {
               <option value="" disabled>Select a category</option>
               <option value="FOOD">Food</option>
               <option value="CLOTHES">Clothes</option>
+              <option value="SHOES">Shoes</option>
               <option value="BOOKS">Books</option>
               <option value="ELECTRONICS">Electronics</option>
               <option value="OTHER">Other</option>
