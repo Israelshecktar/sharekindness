@@ -1,3 +1,5 @@
+// Footer.jsx
+
 import { useState, useEffect } from "react";
 import {
   HomeIcon,
@@ -7,13 +9,15 @@ import {
   XMarkIcon,
 } from "@heroicons/react/24/outline";
 import DonationModal from "./DonationModal";
+import ProfileModal from "./ProfileModal"; // <-- Our new, styled ProfileModal
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import api from "../utils/api";
 
 const Footer = () => {
-  const [isProfileOpen, setIsProfileOpen] = useState(false);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false); // For the small menu: "Profile", "Sign Out"
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false); // For the big ProfileModal
+  const [isDonationModalOpen, setIsDonationModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("home");
   const [notificationCount, setNotificationCount] = useState(0);
 
@@ -95,7 +99,7 @@ const Footer = () => {
         {/* Add Donation */}
         <button
           onClick={() => {
-            setIsModalOpen(true);
+            setIsDonationModalOpen(true);
             setActiveTab("add");
           }}
           className={`flex flex-col items-center transition ${
@@ -149,10 +153,10 @@ const Footer = () => {
           )}
         </a>
 
-        {/* Profile */}
+        {/* Account */}
         <button
           onClick={() => {
-            setIsProfileOpen(true);
+            setIsProfileMenuOpen(true);
             setActiveTab("profile");
           }}
           className={`flex flex-col items-center transition ${
@@ -170,11 +174,13 @@ const Footer = () => {
         </button>
       </nav>
 
-      {/* ADD DONATION Modal */}
-      {isModalOpen && <DonationModal onClose={() => setIsModalOpen(false)} />}
+      {/* Donation Modal */}
+      {isDonationModalOpen && (
+        <DonationModal onClose={() => setIsDonationModalOpen(false)} />
+      )}
 
-      {/* PROFILE Modal */}
-      {isProfileOpen && (
+      {/* The mini-menu for "Account" (Profile / Sign Out) */}
+      {isProfileMenuOpen && (
         <div
           className="
             fixed inset-0
@@ -184,9 +190,9 @@ const Footer = () => {
           "
         >
           <div className="bg-white rounded-lg p-6 w-10/12 max-w-xs relative">
-            {/* Close Button */}
+            {/* Close Button for the mini-menu */}
             <button
-              onClick={() => setIsProfileOpen(false)}
+              onClick={() => setIsProfileMenuOpen(false)}
               className="absolute top-4 right-4 text-gray-600 hover:text-gray-900 transition"
               aria-label="Close Modal"
             >
@@ -195,22 +201,57 @@ const Footer = () => {
 
             <h2 className="text-lg font-bold mb-4 text-gray-800">Account</h2>
             <nav className="space-y-4">
-              <a
-                href="/settings"
-                className="block w-full px-4 py-2 text-left rounded-lg text-gray-700 hover:text-gray-900 hover:bg-gray-100 transition"
+              {/* “Profile” -> opens the new ProfileModal */}
+              <button
+                onClick={() => {
+                  setIsProfileModalOpen(true);
+                  setIsProfileMenuOpen(false); // close this mini-menu
+                }}
+                className="
+                  block
+                  w-full
+                  text-left
+                  px-4 py-2
+                  rounded-lg
+                  text-gray-700
+                  hover:text-gray-900
+                  hover:bg-gray-100
+                  transition
+                "
               >
-                Settings
-              </a>
+                Profile
+              </button>
+
+              {/* “Sign Out” -> calls logout */}
               <button
                 onClick={handleLogout}
-                className="block w-full text-left px-4 py-2 text-red-500 hover:bg-gray-100 hover:text-red-600 transition"
+                className="
+                  block
+                  w-full
+                  text-left
+                  px-4 py-2
+                  text-red-500
+                  hover:bg-gray-100
+                  hover:text-red-600
+                  transition
+                "
               >
                 Sign Out
               </button>
             </nav>
+
             <button
-              onClick={() => setIsProfileOpen(false)}
-              className="mt-6 w-full py-2 bg-pink-500 text-white rounded-lg hover:bg-pink-600 transition"
+              onClick={() => setIsProfileMenuOpen(false)}
+              className="
+                mt-6
+                w-full
+                py-2
+                bg-pink-500
+                text-white
+                rounded-lg
+                hover:bg-pink-600
+                transition
+              "
             >
               Close
             </button>
@@ -218,7 +259,13 @@ const Footer = () => {
         </div>
       )}
 
-      {/* Footer Content (Large screens) */}
+      {/* The big, stylish ProfileModal itself */}
+      <ProfileModal
+        isOpen={isProfileModalOpen}
+        onClose={() => setIsProfileModalOpen(false)}
+      />
+
+      {/* Footer Content (Desktop) */}
       <div className="hidden sm:block pt-4 mt-4 text-center">
         <div className="flex justify-center space-x-6">
           <a

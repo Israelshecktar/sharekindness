@@ -7,9 +7,12 @@ import {
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import api from "../utils/api"; // Import centralized API handler
+import ProfileModal from "./ProfileModal";  // <-- Import our ProfileModal
 
 const Header = () => {
-  const [isProfileOpen, setIsProfileOpen] = useState(false);
+  // Separate states for the dropdown and the modal
+  const [isAccountDropdownOpen, setIsAccountDropdownOpen] = useState(false);
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("home");
   const [notificationCount, setNotificationCount] = useState(0);
 
@@ -45,6 +48,23 @@ const Header = () => {
         error.response?.data?.detail || "An error occurred during logout."
       );
     }
+  };
+
+  // Toggle the account dropdown
+  const toggleAccountDropdown = () => {
+    setIsAccountDropdownOpen((prev) => !prev);
+    setActiveTab("profile");
+  };
+
+  // Show the Profile Modal & hide dropdown
+  const openProfileModal = () => {
+    setIsProfileModalOpen(true);
+    setIsAccountDropdownOpen(false);
+  };
+
+  // Hide the Profile Modal
+  const closeProfileModal = () => {
+    setIsProfileModalOpen(false);
   };
 
   return (
@@ -156,13 +176,10 @@ const Header = () => {
             )}
           </a>
 
-          {/* Profile */}
+          {/* Account */}
           <div className="relative">
             <button
-              onClick={() => {
-                setIsProfileOpen((prev) => !prev);
-                setActiveTab("profile");
-              }}
+              onClick={toggleAccountDropdown}
               className={`flex items-center transition-colors ${
                 activeTab === "profile"
                   ? "text-indigo-600"
@@ -176,7 +193,9 @@ const Header = () => {
               />
               <span>Account</span>
             </button>
-            {isProfileOpen && (
+
+            {/* Dropdown with Profile & Sign Out */}
+            {isAccountDropdownOpen && (
               <div
                 className="
                   absolute
@@ -190,12 +209,12 @@ const Header = () => {
                   p-2
                 "
               >
-                <a
-                  href="/settings"
-                  className="block px-4 py-2 hover:bg-gray-100"
+                <button
+                  onClick={openProfileModal}
+                  className="block w-full text-left px-4 py-2 hover:bg-gray-100"
                 >
-                  Settings
-                </a>
+                  Profile
+                </button>
                 <button
                   onClick={handleLogout}
                   className="
@@ -214,6 +233,12 @@ const Header = () => {
           </div>
         </nav>
       </div>
+
+      {/* ProfileModal */}
+      <ProfileModal
+        isOpen={isProfileModalOpen}
+        onClose={closeProfileModal}
+      />
     </header>
   );
 };
