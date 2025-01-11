@@ -37,9 +37,11 @@ class Donation(models.Model):
     CATEGORY_CHOICES = [
         ('FOOD', 'Food'),
         ('CLOTHES', 'Clothes'),
+        ('SHOES', 'Shoes'),
         ('BOOKS', 'Books'),
         ('ELECTRONICS', 'Electronics'),
         ('OTHER', 'Other'),
+        
     ]
     STATUS_CHOICES = [
         ('AVAILABLE', 'Available'),  # Donation is available for requests.

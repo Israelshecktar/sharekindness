@@ -4,8 +4,8 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import api from "../../utils/api"; // Import the centralized API handler
-import statesAndCities from "../../utils/statesAndCities";
+import api from "../utils/api"; // Import the centralized API handler
+import statesAndCities from "../utils/statesAndCities";
 
 const AuthPage = () => {
   const router = useRouter();

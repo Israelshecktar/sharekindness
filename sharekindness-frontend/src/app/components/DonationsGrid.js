@@ -11,7 +11,7 @@ const DonationsGrid = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const categories = ["All", "Food", "Clothes", "Books", "Electronics", "Other"];
+  const categories = ["All", "Food", "Clothes", "Shoes", "Books", "Electronics", "Other"];
 
   useEffect(() => {
     const fetchDonations = async () => {
