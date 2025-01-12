@@ -9,7 +9,7 @@ import statesAndCities from "../utils/statesAndCities";
 
 const ProfileModal = ({ isOpen, onClose }) => {
   const [formData, setFormData] = useState({
-    profile_picture: "/default-profile.jpg", // default fallback
+    profile_picture: null, // Store as null initially
     username: "",
     email: "",
     phone_number: "",
@@ -18,6 +18,7 @@ const ProfileModal = ({ isOpen, onClose }) => {
     bio: ""
   });
 
+  const [profilePictureUrl, setProfilePictureUrl] = useState("/default-profile.jpg"); // For displaying the image
   const [isEditing, setIsEditing] = useState(false);
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
   const [passwordModalOpen, setPasswordModalOpen] = useState(false);
@@ -26,16 +27,16 @@ const ProfileModal = ({ isOpen, onClose }) => {
     if (isOpen) {
       api.get("/api/user/profile/")
         .then(data => {
-          console.log("Profile data received:", data); // Debugging log
           setFormData({
-            profile_picture: data.profile_picture || "/default-profile.jpg",
             username: data.username || "",
             email: data.email || "",
             phone_number: data.phone_number || "",
             city: data.city || "",
             state: data.state || "",
-            bio: data.bio || ""
+            bio: data.bio || "",
+            profile_picture: null // Clear the profile picture field
           });
+          setProfilePictureUrl(data.profile_picture || "/default-profile.jpg");
         })
         .catch(error => {
           console.error("Failed to fetch profile:", error);
@@ -46,29 +47,54 @@ const ProfileModal = ({ isOpen, onClose }) => {
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: files ? files[0] : value
-    }));
+    if (files) {
+      setFormData(prev => ({
+        ...prev,
+        [name]: files[0]
+      }));
+      setProfilePictureUrl(URL.createObjectURL(files[0]));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        [name]: value
+      }));
+    }
   };
 
   const handleSave = async () => {
     const body = new FormData();
     Object.keys(formData).forEach(key => {
-      body.append(key, formData[key]);
+      body.append(key, formData[key] instanceof File ? formData[key] : formData[key]);
     });
-
+  
     try {
-      await api.put("/api/user/profile/", body, {
+      const response = await api.put("/api/user/profile/", body, {
         headers: { "Content-Type": "multipart/form-data" }
       });
-      toast.success("Profile updated successfully!");
+  
+      if (response.status === 200) {
+        toast.success("Profile updated successfully!");
+        // Update formData with the new data from the server
+        setFormData({
+          ...formData,
+          profile_picture: response.data.profile_picture || formData.profile_picture,
+          username: response.data.username,
+          email: response.data.email,
+          phone_number: response.data.phone_number,
+          city: response.data.city,
+          state: response.data.state,
+          bio: response.data.bio
+        });
+      } else {
+        throw new Error('Failed to update profile.');
+      }
       setIsEditing(false);
     } catch (error) {
       console.error("Failed to update profile:", error);
       toast.error(error?.response?.data?.error || "Failed to update profile.");
     }
   };
+  
 
   const handleDeleteAccount = async () => {
     if (confirm("Are you sure you want to delete your account? This action is irreversible.")) {
@@ -98,7 +124,7 @@ const ProfileModal = ({ isOpen, onClose }) => {
           <div className="sm:w-1/3 flex flex-col items-center">
             <div className="relative w-32 h-32">
               <img
-                src={formData.profile_picture}
+                src={profilePictureUrl}
                 alt="Profile"
                 className="w-32 h-32 rounded-full object-cover border border-gray-200 shadow-sm"
               />
@@ -128,7 +154,7 @@ const ProfileModal = ({ isOpen, onClose }) => {
               </div>
               <div>
                 <label className="mb-1 block text-sm font-medium text-gray-700">State</label>
-                <select name="state" value={formData.state} disabled={!isEditing} onChange={(e) => setFormData({ ...formData, state: e.target.value, city: "" })} className="w-full px-4 py-2 rounded-md border focus:outline-none focus:ring-2 focus:ring-blue-400 border-gray-300 bg-white">
+                <select name="state" value={formData.state} disabled={!isEditing} onChange={handleChange} className="w-full px-4 py-2 rounded-md border focus:outline-none focus:ring-2 focus:ring-blue-400 border-gray-300 bg-white">
                   <option value="">Select a state</option>
                   {Object.keys(statesAndCities).map((state) => (
                     <option key={state} value={state}>{state}</option>

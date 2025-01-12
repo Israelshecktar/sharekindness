@@ -3,18 +3,25 @@ from .models import User, Donation, Request
 
 
 class UserSerializer(serializers.ModelSerializer):
-    profile_picture = serializers.SerializerMethodField()  # Dynamically include the full URL for the profile picture
+    profile_picture = serializers.ImageField(max_length=None, use_url=True, allow_null=True, required=False)
 
     class Meta:
         model = User
         fields = ['id', 'username', 'email', 'profile_picture', 'phone_number', 'city', 'state', 'bio']
 
-    def get_profile_picture(self, obj):
-        request = self.context.get("request")
-        if obj.profile_picture:
-            return request.build_absolute_uri(obj.profile_picture.url) if request else obj.profile_picture.url
-        return None
-
+    def update(self, instance, validated_data):
+        instance.username = validated_data.get('username', instance.username)
+        instance.email = validated_data.get('email', instance.email)
+        instance.phone_number = validated_data.get('phone_number', instance.phone_number)
+        instance.city = validated_data.get('city', instance.city)
+        instance.state = validated_data.get('state', instance.state)
+        instance.bio = validated_data.get('bio', instance.bio)
+        
+        if 'profile_picture' in validated_data:
+            instance.profile_picture = validated_data.get('profile_picture')
+        
+        instance.save()
+        return instance
 
 
 # Register Serializer 
