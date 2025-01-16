@@ -64,37 +64,22 @@ const ProfileModal = ({ isOpen, onClose }) => {
   const handleSave = async () => {
     const body = new FormData();
     Object.keys(formData).forEach(key => {
-      body.append(key, formData[key] instanceof File ? formData[key] : formData[key]);
+      if (formData[key] !== null) { // Only append non-null values
+        body.append(key, formData[key]);
+      }
     });
-  
+
     try {
-      const response = await api.put("/api/user/profile/", body, {
+      await api.put("/api/user/profile/", body, {
         headers: { "Content-Type": "multipart/form-data" }
       });
-  
-      if (response.status === 200) {
-        toast.success("Profile updated successfully!");
-        // Update formData with the new data from the server
-        setFormData({
-          ...formData,
-          profile_picture: response.data.profile_picture || formData.profile_picture,
-          username: response.data.username,
-          email: response.data.email,
-          phone_number: response.data.phone_number,
-          city: response.data.city,
-          state: response.data.state,
-          bio: response.data.bio
-        });
-      } else {
-        throw new Error('Failed to update profile.');
-      }
+      toast.success("Profile updated successfully!");
       setIsEditing(false);
     } catch (error) {
       console.error("Failed to update profile:", error);
       toast.error(error?.response?.data?.error || "Failed to update profile.");
     }
   };
-  
 
   const handleDeleteAccount = async () => {
     if (confirm("Are you sure you want to delete your account? This action is irreversible.")) {
@@ -146,15 +131,15 @@ const ProfileModal = ({ isOpen, onClose }) => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="mb-1 block text-sm font-medium text-gray-700">Username</label>
-                <input type="text" name="username" value={formData.username} readOnly={!isEditing} onChange={handleChange} className="w-full px-4 py-2 rounded-md border focus:outline-none focus:ring-2 focus:ring-blue-400 border-gray-300 bg-white" />
+                <input type="text" name="username" value={formData.username} readOnly={!isEditing} onChange={handleChange} className="w-full px-4 text-black py-2 rounded-md border focus:outline-none focus:ring-2 focus:ring-blue-400 border-gray-300 bg-white" />
               </div>
               <div>
                 <label className="mb-1 block text-sm font-medium text-gray-700">Phone Number</label>
-                <input type="text" name="phone_number" value={formData.phone_number} readOnly={!isEditing} onChange={handleChange} className="w-full px-4 py-2 rounded-md border focus:outline-none focus:ring-2 focus:ring-blue-400 border-gray-300 bg-white" />
+                <input type="text" name="phone_number" value={formData.phone_number} readOnly={!isEditing} onChange={handleChange} className="w-full px-4 text-black py-2 rounded-md border focus:outline-none focus:ring-2 focus:ring-blue-400 border-gray-300 bg-white" />
               </div>
               <div>
                 <label className="mb-1 block text-sm font-medium text-gray-700">State</label>
-                <select name="state" value={formData.state} disabled={!isEditing} onChange={handleChange} className="w-full px-4 py-2 rounded-md border focus:outline-none focus:ring-2 focus:ring-blue-400 border-gray-300 bg-white">
+                <select name="state" value={formData.state} disabled={!isEditing} onChange={handleChange} className="w-full px-4 py-2 text-black rounded-md border focus:outline-none focus:ring-2 focus:ring-blue-400 border-gray-300 bg-white">
                   <option value="">Select a state</option>
                   {Object.keys(statesAndCities).map((state) => (
                     <option key={state} value={state}>{state}</option>
@@ -163,7 +148,7 @@ const ProfileModal = ({ isOpen, onClose }) => {
               </div>
               <div>
                 <label className="mb-1 block text-sm font-medium text-gray-700">City</label>
-                <select name="city" value={formData.city} disabled={!isEditing || !formData.state} onChange={handleChange} className="w-full px-4 py-2 rounded-md border focus:outline-none focus:ring-2 focus:ring-blue-400 border-gray-300 bg-white">
+                <select name="city" value={formData.city} disabled={!isEditing || !formData.state} onChange={handleChange} className="w-full px-4 text-black py-2 rounded-md border focus:outline-none focus:ring-2 focus:ring-blue-400 border-gray-300 bg-white">
                   <option value="">Select a city</option>
                   {statesAndCities[formData.state]?.map((city) => (
                     <option key={city} value={city}>{city}</option>
@@ -173,7 +158,7 @@ const ProfileModal = ({ isOpen, onClose }) => {
             </div>
             <div className="mt-4">
               <label className="mb-1 block text-sm font-medium text-gray-700">Email</label>
-              <input type="email" name="email" value={formData.email} readOnly className="w-full px-4 py-2 rounded-md border border-transparent bg-gray-100 text-gray-600" />
+              <input type="email" name="email" value={formData.email} readOnly className="w-full px-4 text-black py-2 rounded-md border border-transparent bg-gray-100 text-gray-600" />
             </div>
             <div className="flex flex-wrap gap-3 mt-6">
               {isEditing ? (
