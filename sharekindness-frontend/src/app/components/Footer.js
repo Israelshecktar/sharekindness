@@ -160,9 +160,7 @@ const Footer = () => {
             setActiveTab("profile");
           }}
           className={`flex flex-col items-center transition ${
-            activeTab === "profile"
-              ? "text-yellow-300"
-              : "hover:text-gray-200"
+            activeTab === "profile" ? "text-yellow-300" : "hover:text-gray-200"
           }`}
         >
           <UserIcon
@@ -281,10 +279,10 @@ const Footer = () => {
             Contact
           </a>
           <a
-            href="#"
+            href="/terms-and-conditions" // <-- UPDATED: Links to the T&C page
             className="underline text-sm hover:text-gray-100 transition"
           >
-            Privacy Policy
+            Terms & Conditions
           </a>
         </div>
         <p className="text-xs mt-4 text-yellow-100">

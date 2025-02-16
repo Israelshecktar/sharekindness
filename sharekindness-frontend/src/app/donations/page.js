@@ -89,14 +89,14 @@ const UserDashboard = () => {
 
       toast.success("Request approved successfully!");
 
-      //
       // Update local state so we see the new request status
-      // in both the donations array and the side modal
-      //
       setData((prevData) => ({
         ...prevData,
         donations: prevData.donations.map((d) => {
-          if (selectedDonation && d.donation.id === selectedDonation.donation.id) {
+          if (
+            selectedDonation &&
+            d.donation.id === selectedDonation.donation.id
+          ) {
             return {
               ...d,
               requests: d.requests.map((r) =>
@@ -135,9 +135,7 @@ const UserDashboard = () => {
       await api.patch(`api/requests/${requestId}/mark-as-claimed/`);
       toast.success("Item successfully claimed!");
 
-      //
       // Update local state in both donations + requests
-      //
       setData((prevData) => ({
         ...prevData,
         donations: prevData.donations.map((d) => ({
@@ -176,7 +174,8 @@ const UserDashboard = () => {
       ? image
       : `${process.env.NEXT_PUBLIC_API_URL}/${image.replace(/^\//, "")}`;
 
-  const formatStatus = (status) => STATUS_STYLES[status] || STATUS_STYLES.DEFAULT;
+  const formatStatus = (status) =>
+    STATUS_STYLES[status] || STATUS_STYLES.DEFAULT;
 
   // ---------------------------
   // Render
@@ -185,7 +184,7 @@ const UserDashboard = () => {
     <>
       <Header />
 
-      <div className="min-h-screen bg-blue-100 py-8 px-2 sm:px-4 lg:px-2">
+      <div className="min-h-screen bg-blue-100 py-8 px-2 sm:px-4 lg:px=2">
         <div className="max-w-4xl mx-auto">
           {/* Heading */}
           <div className="mb-10 text-center">
@@ -253,14 +252,16 @@ const UserDashboard = () => {
           {/* Donations & Requests */}
           {!loading && (
             <div className="pb-24">
-              {/* ---------------------
-                  Donations Tab
-              --------------------- */}
+              {/* =====================
+                  DONATIONS TAB
+              ===================== */}
               {activeTab === "donations" && (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                   {data.donations.length > 0 ? (
                     data.donations.map((donationObj) => {
                       const { donation, requests } = donationObj;
+                      // donation might contain claimed_by, e.g. [ "Ayoade" ]
+
                       return (
                         <div
                           key={donation.id}
@@ -289,49 +290,58 @@ const UserDashboard = () => {
                           <p className="text-gray-700 text-sm mb-2">
                             <strong>Requests:</strong> {requests.length}
                           </p>
-                          <p className="text-gray-700 text-sm mb-4">
+                          <p className="text-gray-700 text-sm">
                             <strong>Status:</strong> {donation.status}
                           </p>
 
-                          {/* 
-                            If donation is "CLAIMED" or "REQUEST CLOSED", 
-                            show "Item Fully Claimed" or "Request Closed" label 
-                            otherwise, allow "Review Requests"
-                          */}
-                          {donation.status === "CLAIMED" ? (
-                            <button
-                              disabled
-                              className="mt-auto py-2 w-full font-semibold text-white bg-gray-400 rounded-md cursor-not-allowed"
-                            >
-                              Item Fully Claimed
-                            </button>
-                          ) : donation.status === "REQUEST CLOSED" ? (
-                            <button
-                              disabled
-                              className="mt-auto py-2 w-full font-semibold text-white bg-gray-400 rounded-md cursor-not-allowed"
-                            >
-                              Request Closed
-                            </button>
-                          ) : (
-                            <button
-                              onClick={() => setSelectedDonation(donationObj)}
-                              className="mt-auto py-2 w-full font-semibold text-white rounded-md bg-gradient-to-r from-pink-500 to-yellow-500 hover:from-pink-600 hover:to-yellow-600 transition focus:outline-none"
-                            >
-                              Review Requests
-                            </button>
-                          )}
+                          {/* If item is claimed and we have who claimed it, display them */}
+                          {donation.status === "CLAIMED" &&
+                            donation.claimed_by &&
+                            donation.claimed_by.length > 0 && (
+                              <p className="mt-1 text-sm text-blue-600 font-semibold">
+                                Claimed by: {donation.claimed_by.join(", ")}
+                              </p>
+                            )}
+
+                          {/* Donation Action Button */}
+                          <div className="mt-auto">
+                            {donation.status === "CLAIMED" ? (
+                              <button
+                                disabled
+                                className="mt-3 py-2 w-full font-semibold text-white bg-gray-400 rounded-md cursor-not-allowed"
+                              >
+                                Item Fully Claimed
+                              </button>
+                            ) : donation.status === "REQUEST CLOSED" ? (
+                              <button
+                                disabled
+                                className="mt-3 py-2 w-full font-semibold text-white bg-gray-400 rounded-md cursor-not-allowed"
+                              >
+                                Request Closed
+                              </button>
+                            ) : (
+                              <button
+                                onClick={() => setSelectedDonation(donationObj)}
+                                className="mt-3 py-2 w-full font-semibold text-white rounded-md bg-gradient-to-r from-pink-500 to-yellow-500 hover:from-pink-600 hover:to-yellow-600 transition focus:outline-none"
+                              >
+                                Review Requests
+                              </button>
+                            )}
+                          </div>
                         </div>
                       );
                     })
                   ) : (
-                    <p className="text-center text-gray-500">No donations yet.</p>
+                    <p className="text-center text-gray-500">
+                      No donations yet.
+                    </p>
                   )}
                 </div>
               )}
 
-              {/* ---------------------
-                  Requests Tab
-              --------------------- */}
+              {/* =====================
+                  REQUESTS TAB
+              ===================== */}
               {activeTab === "requests" && (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                   {data.requests.length > 0 ? (
@@ -380,9 +390,10 @@ const UserDashboard = () => {
                           )}
 
                           {/* If request is CLAIMED, show label */}
+                          {/* If request is CLAIMED, show "Donated by" */}
                           {req.status === "CLAIMED" && (
                             <p className="mt-4 text-blue-600 font-semibold">
-                              Item Claimed
+                              Donated by {donation?.donor_name}
                             </p>
                           )}
                         </div>
@@ -399,9 +410,7 @@ const UserDashboard = () => {
           )}
         </div>
       </div>
-
       <Footer />
-
       {/* The SideModal for reviewing requests for a particular donation */}
       {selectedDonation && (
         <SideModal

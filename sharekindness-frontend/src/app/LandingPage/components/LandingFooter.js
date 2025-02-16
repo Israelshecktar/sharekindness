@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+
 const LandingFooter = () => {
   return (
     <footer className="relative bg-gradient-to-r from-blue-800 to-blue-900 text-white py-8 px-6 overflow-hidden">
@@ -82,12 +84,12 @@ const LandingFooter = () => {
             >
               Contact
             </a>
-            <a
-              href="/privacy-policy"
+            <Link
+              href="/terms-and-conditions"
               className="text-xs underline hover:text-yellow-300 transition"
             >
-              Privacy Policy
-            </a>
+              Terms & Conditions
+            </Link>
           </nav>
 
           {/* Social Links */}
@@ -159,11 +161,7 @@ const WaveDivider = () => (
     preserveAspectRatio="none"
     className="w-full h-full"
   >
-    <path
-      fill="#1e3a8a" /* A deeper blue to blend with your gradient */
-      fillOpacity="1"
-      d="M0,32L34.3,42.7C68.6,53,137,75,206,106.7C274.3,139,343,181,411,181.3C480,181,549,139,617,138.7C685.7,139,754,181,823,197.3C891.4,213,960,203,1029,186.7C1097.1,171,1166,149,1234,154.7C1302.9,160,1371,192,1406,208L1440,224L1440,0L1406,0C1371,0,1303,0,1234,0C1166,0,1097,0,1029,0C960,0,891,0,823,0C754.3,0,685,0,617,0C548.6,0,480,0,411,0C342.9,0,274,0,206,0C137.1,0,69,0,34,0L0,0Z"
-    />
+    <path fill="#1e3a8a" fillOpacity="1" d="M0,32L34.3,42.7C68.6,53,137,75..." />
   </svg>
 );
 
