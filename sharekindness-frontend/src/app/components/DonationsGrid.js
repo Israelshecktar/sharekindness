@@ -23,9 +23,7 @@ const DonationsGrid = () => {
           ...donation,
           image: donation.image.startsWith("http")
             ? donation.image
-            : `${
-                process.env.NEXT_PUBLIC_API_URL.replace(/\/$/, "")
-              }/${donation.image.replace(/^\//, "")}`,
+            : `${process.env.NEXT_PUBLIC_API_URL.replace(/\/$/, "")}/${donation.image.replace(/^\//, "")}`,
         }));
 
         setDonations(donationsWithAbsoluteImages);
@@ -44,11 +42,8 @@ const DonationsGrid = () => {
 
   const filteredDonations = donations.filter((donation) => {
     const backendCategory = formatCategoryForBackend(selectedCategory);
-    const matchesCategory =
-      backendCategory === "All" || donation.category === backendCategory;
-    const matchesSearch = donation.item_name
-      .toLowerCase()
-      .includes(searchQuery.toLowerCase());
+    const matchesCategory = backendCategory === "All" || donation.category === backendCategory;
+    const matchesSearch = donation.item_name.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesCategory && matchesSearch;
   });
 
@@ -58,13 +53,7 @@ const DonationsGrid = () => {
 
       {/* Outer Section with Extra Bottom Padding */}
       <section
-        className="
-          min-h-screen
-          bg-gradient-to-b from-blue-50 to-blue-100
-          py-8
-          px-4
-          pb-32  /* <-- increased bottom padding so last cards won't overlap footer */
-        "
+        className="min-h-screen bg-gradient-to-b from-blue-50 to-blue-100 py-8 px-4 pb-32"
       >
         <div className="max-w-7xl mx-auto">
           {/* Mobile Category Pills */}
@@ -74,21 +63,11 @@ const DonationsGrid = () => {
                 <button
                   key={category}
                   onClick={() => setSelectedCategory(category)}
-                  className={`
-                    flex-shrink-0
-                    px-4 py-2
-                    text-sm
-                    font-semibold
-                    rounded-full
-                    whitespace-nowrap
-                    border border-transparent
-                    transition-colors
-                    ${
-                      selectedCategory === category
-                        ? "bg-pink-600 text-white"
-                        : "bg-blue-200 text-blue-800 hover:bg-blue-300"
-                    }
-                  `}
+                  className={`flex-shrink-0 px-4 py-2 text-sm font-semibold rounded-full whitespace-nowrap border border-transparent transition-colors ${
+                    selectedCategory === category
+                      ? "bg-pink-600 text-white"
+                      : "bg-blue-200 text-blue-800 hover:bg-blue-300"
+                  }`}
                 >
                   {category}
                 </button>
@@ -97,17 +76,7 @@ const DonationsGrid = () => {
           </div>
 
           {/* Desktop Filter + Search */}
-          <div
-            className="
-              hidden
-              sm:flex
-              flex-row
-              justify-between
-              items-center
-              mb-8
-              gap-4
-            "
-          >
+          <div className="hidden sm:flex flex-row justify-between items-center mb-8 gap-4">
             <CategoryFilter
               categories={categories}
               selectedCategory={selectedCategory}
@@ -117,17 +86,7 @@ const DonationsGrid = () => {
           </div>
 
           {/* Donations Grid */}
-          <div
-            className="
-              grid
-              grid-cols-1
-              sm:grid-cols-2
-              md:grid-cols-3
-              lg:grid-cols-4
-              gap-6
-              animate-fadeIn
-            "
-          >
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 animate-fadeIn">
             {loading ? (
               <div className="col-span-full flex items-center justify-center">
                 {/* Loading Spinner */}
@@ -138,19 +97,8 @@ const DonationsGrid = () => {
                     fill="none"
                     viewBox="0 0 24 24"
                   >
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                    ></circle>
-                    <path
-                      className="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8v8H4z"
-                    ></path>
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
                   </svg>
                   <p className="text-gray-600">Loading donations...</p>
                 </div>
@@ -166,14 +114,13 @@ const DonationsGrid = () => {
                   image={donation.image}
                   status={donation.status}
                   donorName={donation.donor_name}
+                  claimedBy={donation.claimed_by} // ✅ NEW: Pass claimed_by to DonationCard
                 />
               ))
             ) : (
               <p className="text-center text-gray-500 col-span-full">
                 No donations match your search or perhaps you need to{" "}
-                <a href="/auth" className="text-pink-600 underline">
-                  Sign In
-                </a>
+                <a href="/auth" className="text-pink-600 underline">Sign In</a>
               </p>
             )}
           </div>

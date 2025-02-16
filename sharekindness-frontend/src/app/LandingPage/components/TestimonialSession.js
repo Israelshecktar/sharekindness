@@ -4,22 +4,22 @@ import { StarIcon } from "@heroicons/react/24/solid";
 
 const testimonials = [
   {
-    name: "Jane Doe",
-    image: "/testimonials/jane.jpg",
+    name: "Abdulwasiu Opeyemi",
+    image: "/testimonials/ope.jpg",
     quote: "This platform has completely changed the way I give back to my community. It’s so easy to use!",
     role: "Donor",
     rating: 5,
   },
   {
-    name: "John Smith",
-    image: "/testimonials/john.jpg",
+    name: "Phillips Jethro",
+    image: "/testimonials/jethro.jpg",
     quote: "I found exactly what I needed in just a few clicks. This app is a lifesaver!",
     role: "Recipient",
     rating: 4.5,
   },
   {
-    name: "Emily Johnson",
-    image: "/testimonials/emily.jpg",
+    name: "Adedoyin Adelowo",
+    image: "/testimonials/doyin.jpg",
     quote: "The best part is seeing how my donations make a difference. Thank you ShareKindness!",
     role: "Donor",
     rating: 5,

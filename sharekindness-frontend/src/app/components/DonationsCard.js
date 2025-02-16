@@ -10,6 +10,7 @@ const DonationCard = ({
   status,
   requestsCount,
   donorName = "Anonymous",
+  claimedBy = [], // Array of usernames who claimed the item
 }) => {
   const [isRequestModalOpen, setIsRequestModalOpen] = useState(false);
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
@@ -17,19 +18,29 @@ const DonationCard = ({
   const formatText = (text) =>
     text ? text.charAt(0).toUpperCase() + text.slice(1).toLowerCase() : "";
 
+  // Build a full URL for the image if it's a relative path
   const imageUrl = image?.startsWith("http")
     ? image
     : image
     ? `${process.env.NEXT_PUBLIC_API_URL}/${image.replace(/^\//, "")}`
     : null;
 
-  const isClosed = status === "CLOSED" || requestsCount >= 5;
-  const actionLabel = isClosed ? "Request Closed" : "Request";
+  // Determine if the donation is fully claimed or closed
+  let actionLabel = "Request";
+  let isClosed = false;
+
+  if (status === "CLAIMED") {
+    actionLabel = "Item Fully Claimed";
+    isClosed = true;
+  } else if (status === "CLOSED" || requestsCount >= 5) {
+    actionLabel = "Request Closed";
+    isClosed = true;
+  }
 
   return (
     <div
       className="
-        h-[26rem]            /* Fixed height so the button is consistently placed */
+        h-[26rem]
         bg-white
         shadow-lg
         rounded-lg
@@ -112,15 +123,24 @@ const DonationCard = ({
                   ? "text-green-500"
                   : status === "CLOSED"
                   ? "text-red-500"
+                  : status === "CLAIMED"
+                  ? "text-blue-500"
                   : "text-gray-500"
               }
             >
               {formatText(status)}
             </span>
           </p>
+
+          {/* Display "Claimed by {username}" if item is fully claimed */}
+          {status === "CLAIMED" && claimedBy.length > 0 && (
+            <p className="text-sm text-blue-600 font-semibold mt-2">
+              Claimed by {claimedBy.join(", ")}
+            </p>
+          )}
         </div>
 
-        {/* Action Button (always at the bottom) */}
+        {/* Action Button */}
         <button
           onClick={() => setIsRequestModalOpen(true)}
           disabled={isClosed}

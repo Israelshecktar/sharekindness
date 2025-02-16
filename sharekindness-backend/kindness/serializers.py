@@ -2,12 +2,20 @@ from rest_framework import serializers
 from .models import User, Donation, Request
 
 
+# ---------------------------
+# User Serializer
+# ---------------------------
 class UserSerializer(serializers.ModelSerializer):
-    profile_picture = serializers.ImageField(max_length=None, use_url=True, allow_null=True, required=False)
+    profile_picture = serializers.ImageField(
+        max_length=None, use_url=True, allow_null=True, required=False
+    )
 
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'profile_picture', 'phone_number', 'city', 'state', 'bio']
+        fields = [
+            'id', 'username', 'email', 'profile_picture', 
+            'phone_number', 'city', 'state', 'bio'
+        ]
 
     def update(self, instance, validated_data):
         instance.username = validated_data.get('username', instance.username)
@@ -24,7 +32,9 @@ class UserSerializer(serializers.ModelSerializer):
         return instance
 
 
-# Register Serializer 
+# ---------------------------
+# Register Serializer
+# ---------------------------
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, required=True, style={'input_type': 'password'})
 
@@ -50,14 +60,27 @@ class RegisterSerializer(serializers.ModelSerializer):
         return user
 
 
-# Donation Serializer
+# ---------------------------
+# Donation Serializer (Updated)
+# ---------------------------
 class DonationSerializer(serializers.ModelSerializer):
     donor = UserSerializer(read_only=True)  # Donor details are read-only
-    donor_name = serializers.CharField(source='donor.username', read_only=True)  # Include donor username
+    donor_name = serializers.CharField(source='donor.username', read_only=True)  # Donor username
+    claimed_by = serializers.SerializerMethodField()  # ✅ NEW: List of claimed recipients
 
     class Meta:
         model = Donation
-        fields = ['id', 'donor', 'donor_name', 'item_name', 'description', 'category', 'quantity', 'image', 'status', 'created_at']
+        fields = [
+            'id', 'donor', 'donor_name', 'item_name', 'description', 
+            'category', 'quantity', 'image', 'status', 'created_at', 'claimed_by'
+        ]
+
+    def get_claimed_by(self, obj):
+        """
+        Returns a list of usernames who have claimed the donation.
+        """
+        claimed_requests = obj.requests.filter(status="CLAIMED")  # Get all CLAIMED requests
+        return [req.user.username for req in claimed_requests]  # Extract usernames
 
     def validate(self, data):
         # Ensure at least one image is provided in the request
@@ -73,14 +96,19 @@ class DonationSerializer(serializers.ModelSerializer):
         return value
 
 
+# ---------------------------
 # Request Serializer
+# ---------------------------
 class RequestSerializer(serializers.ModelSerializer):
     user = UserSerializer(read_only=True)  # User details are read-only
     donation = DonationSerializer(read_only=True)
 
     class Meta:
         model = Request
-        fields = ['id', 'user', 'donation', 'status', 'comments', 'requested_quantity', 'created_at']
+        fields = [
+            'id', 'user', 'donation', 'status', 'comments', 
+            'requested_quantity', 'created_at'
+        ]
 
     def validate_requested_quantity(self, value):
         # Ensure requested quantity is a positive integer

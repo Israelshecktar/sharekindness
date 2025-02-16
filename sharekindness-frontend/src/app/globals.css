@@ -1,13 +1,14 @@
-/* Import Montserrat font */
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap');
+/* Import Urbanist font */
+@import url('https://fonts.googleapis.com/css2?family=Urbanist:wght@400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Set Global Background with SVG */
+/* Apply Urbanist globally */
 body {
   @apply text-white;
+  font-family: 'Urbanist', sans-serif;
   background-image: url('/background.svg');
   background-size: cover; /* Cover the entire viewport */
   background-position: center; /* Center the background */

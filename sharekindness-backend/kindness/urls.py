@@ -20,6 +20,7 @@ from kindness.views.donations import DonationListCreateView, DonationDetailView
 from kindness.views.requests import RequestListCreateView, RequestDetailView
 from kindness.views.base import LogView
 from kindness.views.user import UserDashboardView, UserNotificationView, UserProfileView
+from kindness.views.requests import RequestListCreateView, RequestDetailView, MarkAsClaimedView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -37,6 +38,7 @@ urlpatterns = [
     # Request endpoints
     path('api/requests/', RequestListCreateView.as_view(), name='request-list-create'),
     path('api/requests/<int:pk>/', RequestDetailView.as_view(), name='request-detail'),
+    path('api/requests/<int:pk>/mark-as-claimed/', MarkAsClaimedView.as_view(), name='mark-as-claimed'),
 
     # Log endpoint
     path('api/log/', LogView.as_view(), name='log'),
